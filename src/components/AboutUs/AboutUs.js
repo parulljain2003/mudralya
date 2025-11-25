@@ -1,133 +1,218 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import './AboutUs.css';
 
 const AboutUs = () => {
-  const missionCards = [
-    {
-      gif: '/images/aboutus-1.gif',
-      title: 'Simplifying access to lending, insurance, and finance through AI'
-    },
-    {
-      gif: '/images/aboutus-2.gif',
-      title: 'Promoting financial clarity and control with data-driven tools'
-    },
-    {
-      gif: '/images/aboutus-3.gif',
-      title: 'Bridging the gap between users and financial institutions seamlessly'
-    }
-  ];
-
   return (
     <div className="about-us-page">
-      <section className="py-5 py-md-5 mt-5">
-        <div className="container-xl px-4 px-lg-5">
-          <div className="row g-5 align-items-center">
-            <div className="col-md-7 col-lg-8 mb-4 mb-md-0">
-              <h1 className="fw-bolder text-dark mb-3">
-                About <span className="highlight-text">Us</span>
-              </h1>
-              
-              <h2 className="h4 fw-semibold text-secondary mb-4">
-                Empowering Financial Simplicity Through AI
-              </h2>
+      {/* Hero Section */}
+      <section className="about-us-hero-section">
+        <div className="container-fluid about-us-hero-container">
+          <div className="row g-0 align-items-center">
+            {/* Left Section - Banner Image with Text Content */}
+            <div className="col-12 col-lg-6 about-us-hero-left">
+              <div className="about-us-hero-content">
+                {/* Title */}
+                <h1 className="about-us-hero-title">
+                  About <span className="about-us-hero-title-highlight">Us</span>
+                </h1>
+                
+                {/* Subtitle */}
+                <h2 className="about-us-hero-subtitle">
+                  Empowering Financial Simplicity Through AI.
+                </h2>
 
-              <p className="text-secondary fs-6 fs-md-5 lh-base mb-4">
-                At Mudralaya Fintech, we're reimagining the way individuals and small businesses manage their finances. Our goal is simple — to make financial access 
-                <span className="fw-bold highlight-text"> transparent, intelligent, and effortless</span> for everyone.
-              </p>
+                {/* Body Text */}
+                <p className="about-us-hero-text">
+                  Mudralaya is India's emerging financial entrepreneurship platform, built to empower individuals — especially women — to earn, grow, and build their own financial careers or franchises. We believe financial freedom should be accessible to everyone, regardless of background, experience, or starting point.
+                </p>
 
-              <p className="text-secondary fs-6 fs-md-5 lh-base">
-                We are building an AI-powered platform that integrates lending, insurance, and money management into one seamless digital ecosystem. From comparing financial products to managing policies and claims, Mudralaya Fintech ensures users make smart, data-backed decisions with complete confidence
-              </p>
-            </div>
-            
-            <div className="col-md-5 col-lg-4 d-flex justify-content-center">
-              <div className="ai-illustration-container w-100" style={{ maxWidth: '384px' }}>
-                <div className="text-center w-100">
-                  <img 
-                    src="/images/aboutus.webp" 
-                    className="img-fluid rounded" 
-                    alt="AI Agent analyzing financial data"
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/400x300?text=About+Us';
-                    }}
-                  />
-                  <p className="text-muted mt-2 small fw-medium">AI Agent & Financial Data Visualization</p>
+                {/* {Decorative Line }
+                <div className="about-us-hero-divider"></div> */}
+
+                {/* CTA Buttons */}
+                <div className="about-us-hero-buttons">
+                  <Link to="/plans" className="btn btn-about-explore">
+                    Explore Plans
+                  </Link>
+                  <Link to="/advisor" className="btn btn-about-advisor">
+                    Talk to our Advisor
+                  </Link>
                 </div>
+              </div>
+            </div>
+
+            {/* Right Section - About Us Image */}
+            <div className="col-12 col-lg-6 about-us-hero-right">
+              <div className="about-us-hero-image-wrapper">
+                <img 
+                  src="/images/about-us.png" 
+                  alt="About Us" 
+                  className="about-us-hero-image"
+                  onError={(e) => {
+                    e.target.src = '/images/about-us.png';
+                  }}
+                />
               </div>
             </div>
           </div>
         </div>
       </section>
 
-      <section className="py-5 py-md-5 mission-bg">
+      {/* What We Do Section */}
+      <section className="what-we-do-section">
         <div className="container-xl px-4 px-lg-5">
-          <div className="row mb-5 text-center">
-            <div className="col-12">
-              <h2 className="h1 fw-bolder text-dark mb-2">
-                Our <span className="highlight-text">Mission</span>
+          {/* Title and Mission Statement */}
+          <div className="row">
+            <div className="col-12 text-center">
+              <h2 className="what-we-do-title">
+                What We <span className="what-we-do-title-highlight">Do</span>
               </h2>
-              <p className="lead text-secondary mx-auto" style={{ maxWidth: '600px' }}>
-                Empowering every individual to make smart, transparent, and confident financial decisions
-              </p>
-            </div>
-          </div>
-
-          <div className="row g-4 justify-content-center">
-            {missionCards.map((card, index) => (
-              <div key={index} className="col-md-6 col-lg-4">
-                <div className="mission-card shadow-sm">
-                  <div className="icon-box">
-                    <img 
-                      src={card.gif} 
-                      alt={`Mission ${index + 1}`}
-                      onError={(e) => {
-                        e.target.src = 'https://via.placeholder.com/50x50?text=X';
-                      }}
-                    />
-                  </div>
-                  <h3 className="h5 fw-bold mb-2 text-dark">{card.title}</h3>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-5 py-md-5 vision-bg">
-        <div className="container-xl px-4 px-lg-5">
-          <div className="row mb-5 text-center">
-            <div className="col-12">
-              <h2 className="h1 fw-bolder text-dark mb-2">
-                Our <span className="highlight-text">Vision</span>
-              </h2>
-              <p className="lead text-secondary mx-auto" style={{ maxWidth: '700px' }}>
+              <p className="what-we-do-mission">
                 To create India's most trusted and intelligent digital finance ecosystem, where people can access lending, insurance, and money management tools effortlessly
               </p>
             </div>
           </div>
 
-          <div className="row g-4 justify-content-center mb-5 timeline-container">
-            <div className="col-md-4 timeline-step">
-              <div className="timeline-icon">
-                <i className="fa-solid fa-check"></i>
-                <div className="timeline-connector"></div>
+          {/* Content: Illustration and List */}
+          <div className="row align-items-center">
+            {/* Left Side - Illustration */}
+            <div className="col-12 col-lg-6">
+              <div className="what-we-do-illustration">
+                <img 
+                  src="/images/what-we-do.png" 
+                  alt="What We Do Illustration" 
+                  className="img-fluid"
+                  onError={(e) => {
+                    e.target.src = '/images/what-we-do.png';
+                  }}
+                />
               </div>
-              <p className="timeline-label text-dark">Without Bias</p>
             </div>
 
-            <div className="col-md-4 timeline-step">
-              <div className="timeline-icon">
-                <i className="fa-solid fa-check"></i>
+            {/* Right Side - Benefits List */}
+            <div className="col-12 col-lg-6">
+              <div className="what-we-do-list">
+                <div className="what-we-do-item">
+                  <div className="what-we-do-icon">
+                    <i className="fas fa-hand-holding-usd"></i>
+                  </div>
+                  <div className="what-we-do-text">
+                    Start earning with zero investment
+                  </div>
+                </div>
+
+                <div className="what-we-do-item">
+                  <div className="what-we-do-icon">
+                    <i className="fas fa-user-graduate"></i>
+                  </div>
+                  <div className="what-we-do-text">
+                    Become a trained financial professional
+                  </div>
+                </div>
+
+                <div className="what-we-do-item">
+                  <div className="what-we-do-icon">
+                    <i className="fas fa-users"></i>
+                  </div>
+                  <div className="what-we-do-text">
+                    Build leadership skills
+                  </div>
+                </div>
+
+                <div className="what-we-do-item">
+                  <div className="what-we-do-icon">
+                    <i className="fas fa-store"></i>
+                  </div>
+                  <div className="what-we-do-text">
+                    Grow into a franchise owner
+                  </div>
+                </div>
               </div>
-              <p className="timeline-label text-dark">Confusion</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Our Vision Section */}
+      <section className="our-vision-section">
+        <div className="container-xl px-4 px-lg-5">
+          <div className="row">
+            <div className="col-12 text-center">
+              <h2 className="our-vision-title">
+                Our <span className="our-vision-title-highlight">Vision</span>
+              </h2>
+              <p className="our-vision-text">
+                To build a nationwide network of entrepreneurs, micro-franchises, and financial leaders who uplift communities and shape the future of India's financial ecosystem
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Why We Exist Section */}
+      <section className="why-we-exist-section">
+        <div className="container-xl px-4 px-lg-5">
+          {/* Title and Subtitle */}
+          <div className="row mb-5">
+            <div className="col-12 text-center">
+              <h2 className="why-we-exist-title">
+                Why We <span className="why-we-exist-title-highlight">Exist</span>
+              </h2>
+              <p className="why-we-exist-subtitle">
+                Mudralaya bridges these gaps by giving individuals a platform to learn, earn, and lead
+              </p>
+            </div>
+          </div>
+
+          {/* Four Content Blocks - 2x2 Grid */}
+          <div className="row g-4">
+            {/* Top-Left Block */}
+            <div className="col-12 col-md-6">
+              <div className="why-we-exist-block">
+                <div className="why-we-exist-icon">
+                  <i className="fas fa-user-tie"></i>
+                </div>
+                <p className="why-we-exist-text">
+                  More women in entrepreneurship
+                </p>
+              </div>
             </div>
 
-            <div className="col-md-4 timeline-step">
-              <div className="timeline-icon">
-                <i className="fa-solid fa-check"></i>
+            {/* Top-Right Block */}
+            <div className="col-12 col-md-6">
+              <div className="why-we-exist-block">
+                <div className="why-we-exist-icon">
+                  <i className="fas fa-briefcase"></i>
+                </div>
+                <p className="why-we-exist-text">
+                  More job alternatives beyond traditional employment
+                </p>
               </div>
-              <p className="timeline-label text-dark">Complexity</p>
+            </div>
+
+            {/* Bottom-Left Block */}
+            <div className="col-12 col-md-6">
+              <div className="why-we-exist-block">
+                <div className="why-we-exist-icon">
+                  <i className="fas fa-rocket"></i>
+                </div>
+                <p className="why-we-exist-text">
+                  Multi-Product Earnings
+                </p>
+              </div>
+            </div>
+
+            {/* Bottom-Right Block */}
+            <div className="col-12 col-md-6">
+              <div className="why-we-exist-block">
+                <div className="why-we-exist-icon">
+                  <i className="fas fa-laptop"></i>
+                </div>
+                <p className="why-we-exist-text">
+                  Training & Skill Growth
+                </p>
+              </div>
             </div>
           </div>
         </div>
