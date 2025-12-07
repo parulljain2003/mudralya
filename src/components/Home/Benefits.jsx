@@ -7,9 +7,6 @@ const plans = [
     title: 'Partner Program',
     price: '₹ 0',
     benefits: [
-      'Partner (Task-Based Earnings)
-',
-      'Start with zero investment',
       'Start with zero investment',
       'Access to daily/weekly/monthly tasks',
       'Earn by completing tasks from multiple companies',
