@@ -43,7 +43,7 @@ const Header = () => {
       id="main-header"
       className={`navbar navbar-expand-md navbar-light fixed-top px-4 py-2 ${scrolled ? 'scrolled' : ''}`}
     >
-      <div className="container-fluid">
+      <div className="container-xl">
         <Link className="navbar-brand" to="/">
           <img
             src="/images/mudralya_logo.webp"

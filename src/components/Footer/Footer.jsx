@@ -15,22 +15,19 @@ const Footer = () => {
 
   return (
     <footer className="site-footer">
-      <div className="container-fluid">
+      <div className="container-xl">
         <div className="row gy-4">
           <div className="col-lg-4 col-md-4 m-0 mb-3">
             <div className="mb-3">
-              <img
-                src="/images/mudralya_logo.webp"
-                alt="Mudralaya Fintech Logo"
-                style={{ height: '80px', width: 'auto', filter: 'brightness(0) invert(1)' }}
-                onError={(e) => {
-                  e.target.src = 'https://via.placeholder.com/150x80?text=Mudralaya';
-                }}
-              />
+              <div className="footer-logo-box">
+                <span className="footer-logo-text">Mudralaya</span>
+                <span className="footer-logo-text-small">Fintech</span>
+                <span className="footer-logo-check"><i className="fas fa-check-circle"></i></span>
+              </div>
             </div>
 
             <div className="small text-white-50">
-              Copyright © 2020 Mudralaya ltd.
+              Copyright © 2020 Nexcent ltd.
             </div>
             <div className="small text-white-50">
               All rights reserved
@@ -40,8 +37,8 @@ const Footer = () => {
               <a href="#" className="social-icon" aria-label="Instagram">
                 <i className="fab fa-instagram"></i>
               </a>
-              <a href="#" className="social-icon" aria-label="LinkedIn">
-                <i className="fab fa-linkedin-in"></i>
+              <a href="#" className="social-icon" aria-label="Dribbble">
+                <i className="fab fa-dribbble"></i>
               </a>
               <a href="#" className="social-icon" aria-label="Twitter">
                 <i className="fab fa-twitter"></i>
@@ -59,13 +56,13 @@ const Footer = () => {
                 <ul className="list-unstyled small">
                   <li><Link to="/">Home</Link></li>
                   <li><Link to="/about">About us</Link></li>
-                  <li><Link to="/contact">Contact</Link></li>
+                  <li><Link to="/contact">Contact us</Link></li>
                 </ul>
               </div>
               <div className="col-6">
                 <h6>Support</h6>
                 <ul className="list-unstyled small">
-                  <li><a href="#help">Get started</a></li>
+                  <li><a href="#help">Help center</a></li>
                   <li><a href="#terms">Terms of service</a></li>
                   <li><a href="#legal">Legal</a></li>
                   <li><a href="#privacy">Privacy policy</a></li>

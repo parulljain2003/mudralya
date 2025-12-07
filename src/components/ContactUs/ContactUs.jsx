@@ -74,7 +74,7 @@ const ContactUs = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    
+
     // Phone number formatting
     let formattedValue = value;
     if (name === 'phoneNumber') {
@@ -135,7 +135,7 @@ const ContactUs = () => {
 
   const validateField = (name, value) => {
     let error = '';
-    
+
     switch (name) {
       case 'fullName':
         error = validateFullName(value);
@@ -171,7 +171,7 @@ const ContactUs = () => {
 
   const validateForm = () => {
     const newErrors = {};
-    
+
     newErrors.fullName = validateFullName(formData.fullName);
     newErrors.phoneNumber = validatePhoneNumber(formData.phoneNumber);
     newErrors.email = validateEmail(formData.email);
@@ -194,7 +194,7 @@ const ContactUs = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    
+
     if (validateForm()) {
       console.log('Form submitted:', formData);
       alert('Thank you! We will reach you soon.');
@@ -229,7 +229,19 @@ const ContactUs = () => {
             <div className="contact-info-content">
               <h2 className="contact-info-title">Contact Information</h2>
               <p className="contact-info-subtitle">Call us during office hours if facing any doubts</p>
-              
+
+              {/* Customer Support Illustration */}
+              <div className="support-illustration">
+                <img
+                  src="/images/customer-support.png"
+                  alt="Customer Support"
+                  className="support-img"
+                  onError={(e) => {
+                    e.target.src = 'https://via.placeholder.com/150x150?text=Support';
+                  }}
+                />
+              </div>
+
               <div className="contact-details">
                 <div className="contact-item">
                   <i className="fas fa-phone contact-icon"></i>
@@ -269,7 +281,7 @@ const ContactUs = () => {
           <div className="col-12 col-lg-7 contact-form-column">
             <form className="contact-form" onSubmit={handleSubmit}>
               <div className="row g-3">
-                <div className="col-12">
+                <div className="col-md-6">
                   <label htmlFor="fullName" className="form-label">Full Name</label>
                   <input
                     type="text"
@@ -286,7 +298,7 @@ const ContactUs = () => {
                   {errors.fullName && <div className="error-message">{errors.fullName}</div>}
                 </div>
 
-                <div className="col-12">
+                <div className="col-md-6">
                   <label htmlFor="phoneNumber" className="form-label">Phone Number</label>
                   <input
                     type="tel"
@@ -303,7 +315,7 @@ const ContactUs = () => {
                   {errors.phoneNumber && <div className="error-message">{errors.phoneNumber}</div>}
                 </div>
 
-                <div className="col-12">
+                <div className="col-md-6">
                   <label htmlFor="email" className="form-label">Email</label>
                   <input
                     type="email"
@@ -427,13 +439,13 @@ const ContactUs = () => {
 
                 <div className="col-12">
                   <label htmlFor="message" className="form-label">
-                    Message <span className="char-count">({formData.message.length}/500)</span>
+                    Message
                   </label>
                   <textarea
                     className={`form-control ${errors.message ? 'is-invalid' : ''}`}
                     id="message"
                     name="message"
-                    rows="5"
+                    rows="2"
                     placeholder="Write your message.."
                     value={formData.message}
                     onChange={handleChange}
@@ -448,7 +460,7 @@ const ContactUs = () => {
                   <button type="submit" className="btn btn-submit">
                     Submit
                   </button>
-                  <p className="submit-message">Submit the form we will reach you soon</p>
+                  <p className="submit-message">Submit the form and we will get back soon</p>
                 </div>
               </div>
             </form>
