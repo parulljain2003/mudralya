@@ -8,29 +8,29 @@ const Timeline = () => {
   const timelineItems = [
     {
       step: '1',
-      description: 'Fill basic details'
+      description: 'Register for free'
     },
     {
       step: '2',
-      description: 'Complete eligibility check'
+      description: 'Complete your profile'
     },
     {
       step: '3',
-      description: 'Review plan & add-ons'
+      description: 'Choose your category'
     },
     {
       step: '4',
-      description: 'Pay (if required) / Submit'
+      description: 'Get tasks from top companies'
     },
     {
       step: '5',
-      description: 'Start training'
+      description: 'Complete & earn instantly'
     }
   ];
 
   useEffect(() => {
     let autoplayInterval;
-    
+
     const advanceTimeline = () => {
       setActiveIndex((prev) => (prev + 1) % timelineItems.length);
     };
@@ -57,7 +57,7 @@ const Timeline = () => {
           </h2>
           <p className="how-to-join-subtitle">5 Simple Steps</p>
         </div>
-        
+
         <div className="timeline-container">
           <div className="timeline-track">
             {timelineItems.map((item, index) => (
@@ -73,7 +73,7 @@ const Timeline = () => {
             ))}
           </div>
         </div>
-        
+
         <div className="text-center mt-5 mb-5">
           <p className="timeline-cta-text">Join today and start earning!</p>
           <Link to="/advisor" className="btn btn-timeline-cta mt-3">
