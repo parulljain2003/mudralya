@@ -8,6 +8,8 @@ import './App.css';
 const Home = lazy(() => import('./components/Home/Home.jsx'));
 const AboutUs = lazy(() => import('./components/AboutUs/AboutUs.jsx'));
 const ContactUs = lazy(() => import('./components/ContactUs/ContactUs.jsx'));
+const Advisor = lazy(() => import('./components/Advisor/Advisor.jsx'));
+const Plans = lazy(() => import('./components/Home/Home.jsx'));
 const Dashboard = lazy(() => import('./components/Dashboard/Dashboard.jsx'));
 
 // Loading component
@@ -28,8 +30,10 @@ function App() {
           <Suspense fallback={<Loading />}>
             <Routes>
               <Route path="/" element={<Home />} />
+              <Route path="/plans" element={<Plans />} />
               <Route path="/about" element={<AboutUs />} />
               <Route path="/contact" element={<ContactUs />} />
+              <Route path="/advisor" element={<Advisor />} />
               <Route path="/dashboard" element={<Dashboard />} />
             </Routes>
           </Suspense>

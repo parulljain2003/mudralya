@@ -12,7 +12,7 @@ const Hero = () => {
             <div className="hero-content">
               {/* Trust Badge */}
               <div className="trust-badge">
-                <span className="badge-icon">▲</span>
+                <span className="badge-icon">✓</span>
                 <span className="badge-text">100% TRUSTED PLATFORM</span>
               </div>
               
