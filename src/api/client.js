@@ -1,4 +1,11 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+const envBaseUrl = (import.meta.env.VITE_API_BASE_URL || '').trim();
+const isDev = import.meta.env.DEV;
+const isLocalhostBase = /^https?:\/\/localhost(:\d+)?/i.test(envBaseUrl);
+// Avoid shipping a localhost API base in production; default to same-origin instead.
+const API_BASE_URL =
+  envBaseUrl && !( !isDev && isLocalhostBase )
+    ? envBaseUrl
+    : (isDev ? 'http://localhost:5000' : window.location.origin);
 const DASHBOARD_API_KEY = import.meta.env.VITE_DASHBOARD_API_KEY || '';
 
 const buildUrl = (path) => {
