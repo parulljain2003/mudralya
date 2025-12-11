@@ -41,6 +41,12 @@ const Dashboard = () => {
 
   useEffect(() => {
     const checkSession = async () => {
+      // Only check session if we think we are logged in
+      const wasLoggedIn = localStorage.getItem('isAdminLoggedIn');
+      if (!wasLoggedIn) {
+        return;
+      }
+
       setLoading(true);
       setError('');
       try {
@@ -53,8 +59,12 @@ const Dashboard = () => {
           fetchDashboard('active');
         }, 0);
         setUsername(res.user || '');
+        // Ensure flag is set
+        localStorage.setItem('isAdminLoggedIn', 'true');
       } catch (err) {
         setAuthToken('');
+        // Session invalid, clear flag
+        localStorage.removeItem('isAdminLoggedIn');
       } finally {
         setLoading(false);
       }
@@ -78,6 +88,7 @@ const Dashboard = () => {
         setData(null);
         setError('');
         setPassword('');
+        localStorage.setItem('isAdminLoggedIn', 'true');
         fetchDashboard('active');
       } catch (err) {
         setError(err.data?.error || err.message || 'Login failed');
@@ -102,6 +113,8 @@ const Dashboard = () => {
       setData(null);
       setError('');
     };
+    // Clear flag immediately
+    localStorage.removeItem('isAdminLoggedIn');
     doLogout();
   };
 
@@ -227,83 +240,83 @@ const Dashboard = () => {
           )}
 
           {data && (
-        <>
-          <div className="row g-3 mb-3">
-            {sheets.map((card) => (
-              <div className="col-6 col-md-3" key={card.id}>
-                <div className="card stat-card">
-                  <div className="card-body">
-                    <p className="text-muted mb-1">{card.title}</p>
-                    <h4 className="mb-0">{card.count}</h4>
+            <>
+              <div className="row g-3 mb-3">
+                {sheets.map((card) => (
+                  <div className="col-6 col-md-3" key={card.id}>
+                    <div className="card stat-card">
+                      <div className="card-body">
+                        <p className="text-muted mb-1">{card.title}</p>
+                        <h4 className="mb-0">{card.count}</h4>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div className="sheet-tabs">
+                {sheets.map((sheet) => (
+                  <button
+                    key={sheet.id}
+                    type="button"
+                    className={`sheet-tab ${activeSheet === sheet.id ? 'active' : ''}`}
+                    onClick={() => setActiveSheet(sheet.id)}
+                  >
+                    <span className="sheet-title">{sheet.title}</span>
+                    <span className="sheet-count badge">{sheet.count}</span>
+                  </button>
+                ))}
+              </div>
+
+              <div className="sheet-surface">
+                <div className="d-flex justify-content-between align-items-center sheet-header">
+                  <div>
+                    <h5 className="mb-0">{activeSheetData.title}</h5>
+                    <small className="text-muted">Rows: {activeSheetData.rows.length}</small>
+                  </div>
+                  <div className="text-muted small">Auto-refresh via Refresh button</div>
+                  <div className="d-flex align-items-center gap-2">
+                    <button className="btn btn-sm btn-outline-secondary" onClick={fetchDashboard} disabled={loading}>
+                      {loading ? 'Refreshing...' : 'Refresh'}
+                    </button>
+                    <button className="btn btn-sm btn-outline-danger" onClick={handleLogout}>
+                      Logout
+                    </button>
                   </div>
                 </div>
-              </div>
-            ))}
-          </div>
-
-          <div className="sheet-tabs">
-            {sheets.map((sheet) => (
-              <button
-                key={sheet.id}
-                type="button"
-                className={`sheet-tab ${activeSheet === sheet.id ? 'active' : ''}`}
-                onClick={() => setActiveSheet(sheet.id)}
-              >
-                <span className="sheet-title">{sheet.title}</span>
-                <span className="sheet-count badge">{sheet.count}</span>
-              </button>
-            ))}
-          </div>
-
-          <div className="sheet-surface">
-            <div className="d-flex justify-content-between align-items-center sheet-header">
-              <div>
-                <h5 className="mb-0">{activeSheetData.title}</h5>
-                <small className="text-muted">Rows: {activeSheetData.rows.length}</small>
-              </div>
-              <div className="text-muted small">Auto-refresh via Refresh button</div>
-              <div className="d-flex align-items-center gap-2">
-                <button className="btn btn-sm btn-outline-secondary" onClick={fetchDashboard} disabled={loading}>
-                  {loading ? 'Refreshing...' : 'Refresh'}
-                </button>
-                <button className="btn btn-sm btn-outline-danger" onClick={handleLogout}>
-                  Logout
-                </button>
-              </div>
-            </div>
-            <div className="table-responsive sheet-table">
-              <table className="table table-sm mb-0 align-middle">
-                <thead>
-                  <tr>
-                    <th className="row-number-col">#</th>
-                    {activeSheetData.columns.map((col) => (
-                      <th key={col.key}>{col.label}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {activeSheetData.rows.length === 0 && (
-                    <tr>
-                      <td colSpan={activeSheetData.columns.length + 1} className="text-center text-muted">
-                        No records yet
-                      </td>
-                    </tr>
-                  )}
-                  {activeSheetData.rows.map((row, idx) => (
-                    <tr key={row._id || idx}>
-                      <td className="row-number-col text-muted">{idx + 1}</td>
-                      {activeSheetData.columns.map((col) => (
-                        <td key={col.key}>
-                          {col.format ? col.format(row[col.key], row) : row[col.key] || '-'}
-                        </td>
+                <div className="table-responsive sheet-table">
+                  <table className="table table-sm mb-0 align-middle">
+                    <thead>
+                      <tr>
+                        <th className="row-number-col">#</th>
+                        {activeSheetData.columns.map((col) => (
+                          <th key={col.key}>{col.label}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {activeSheetData.rows.length === 0 && (
+                        <tr>
+                          <td colSpan={activeSheetData.columns.length + 1} className="text-center text-muted">
+                            No records yet
+                          </td>
+                        </tr>
+                      )}
+                      {activeSheetData.rows.map((row, idx) => (
+                        <tr key={row._id || idx}>
+                          <td className="row-number-col text-muted">{idx + 1}</td>
+                          {activeSheetData.columns.map((col) => (
+                            <td key={col.key}>
+                              {col.format ? col.format(row[col.key], row) : row[col.key] || '-'}
+                            </td>
+                          ))}
+                        </tr>
                       ))}
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
           )}
         </>
       )}
