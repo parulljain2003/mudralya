@@ -31,6 +31,12 @@ const corsOptions = {
       return callback(null, true);
     }
 
+    // Allow local network access in development
+    const isLocal = /^http:\/\/(?:localhost|127\.0\.0\.1|192\.168\.\d{1,3}\.\d{1,3}|10\.\d{1,3}\.\d{1,3}\.\d{1,3}|172\.(?:1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3})(?::\d+)?$/.test(origin);
+    if (isLocal) {
+      return callback(null, true);
+    }
+
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true
