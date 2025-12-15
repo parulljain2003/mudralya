@@ -1,330 +1,254 @@
 import React, { useEffect, useState } from 'react';
-import './Dashboard.css';
 import { request } from '../../api/client';
+import AdminLayout from './AdminLayout';
+import StatsOverview from './StatsOverview';
+import DataTable from './DataTable';
+import TaskManager from './TaskManager';
+import './DashboardLayout.css'; // New Styles
 
 const formatDate = (value) => {
   if (!value) return '-';
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
-  return date.toLocaleString();
+  return date.toLocaleString('en-IN', {
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: '2-digit', minute: '2-digit'
+  });
 };
 
 const Dashboard = () => {
   const defaultUsername = import.meta.env.VITE_DASHBOARD_USER || '';
-  const [data, setData] = useState(null);
+  const [authToken, setAuthToken] = useState('');
   const [loading, setLoading] = useState(false);
+  const [data, setData] = useState(null);
   const [error, setError] = useState('');
-  const [activeSheet, setActiveSheet] = useState('contacts');
+  const [activeTab, setActiveTab] = useState('overview');
+
+  // Login State
   const [username, setUsername] = useState(defaultUsername);
   const [password, setPassword] = useState('');
-  const [authToken, setAuthToken] = useState('');
 
   const fetchDashboard = async (token = authToken) => {
     if (!token) return;
     setLoading(true);
-    setError('');
     try {
-      const res = await request('/api/dashboard', {
-        includeCredentials: true
-      });
+      const res = await request('/api/dashboard', { includeCredentials: true });
       setData(res);
     } catch (err) {
-      setError(err.data?.error || err.message || 'Failed to load dashboard');
       if (err.status === 401) {
         setAuthToken('');
-        setData(null);
+        localStorage.removeItem('isAdminLoggedIn');
       }
+      console.error(err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
+    // Check Session
     const checkSession = async () => {
-      // Only check session if we think we are logged in
       const wasLoggedIn = localStorage.getItem('isAdminLoggedIn');
-      if (!wasLoggedIn) {
-        return;
-      }
-
-      setLoading(true);
-      setError('');
-      try {
-        const res = await request('/api/admin/session', { includeCredentials: true });
+      if (wasLoggedIn) {
         setAuthToken('active');
-        setData(null);
-        setError('');
-        setActiveSheet('contacts');
-        setTimeout(() => {
-          fetchDashboard('active');
-        }, 0);
-        setUsername(res.user || '');
-        // Ensure flag is set
-        localStorage.setItem('isAdminLoggedIn', 'true');
-      } catch (err) {
-        setAuthToken('');
-        // Session invalid, clear flag
-        localStorage.removeItem('isAdminLoggedIn');
-      } finally {
-        setLoading(false);
+        fetchDashboard('active');
       }
     };
     checkSession();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const handleLogin = (e) => {
+  const handleLogin = async (e) => {
     e.preventDefault();
-    const doLogin = async () => {
-      setLoading(true);
-      setError('');
-      try {
-        await request('/api/admin/login', {
-          method: 'POST',
-          data: { username, password },
-          includeCredentials: true
-        });
-        setAuthToken('active');
-        setData(null);
-        setError('');
-        setPassword('');
-        localStorage.setItem('isAdminLoggedIn', 'true');
-        fetchDashboard('active');
-      } catch (err) {
-        setError(err.data?.error || err.message || 'Login failed');
-        setAuthToken('');
-      } finally {
-        setLoading(false);
-      }
-    };
-    doLogin();
-  };
-
-  const handleLogout = () => {
-    const doLogout = async () => {
-      try {
-        await request('/api/admin/logout', { method: 'POST', includeCredentials: true });
-      } catch (err) {
-        // ignore
-      }
-      setAuthToken('');
-      setUsername('');
-      setPassword('');
-      setData(null);
-      setError('');
-    };
-    // Clear flag immediately
-    localStorage.removeItem('isAdminLoggedIn');
-    doLogout();
-  };
-
-  const sheets = [
-    {
-      id: 'contacts',
-      title: 'Contact Requests',
-      count: data?.counts?.contacts || 0,
-      columns: [
-        { key: 'fullName', label: 'Name' },
-        { key: 'email', label: 'Email' },
-        { key: 'phoneNumber', label: 'Phone' },
-        { key: 'subject', label: 'Subject' },
-        { key: 'occupation', label: 'Occupation' },
-        { key: 'qualification', label: 'Qualification' },
-        { key: 'createdAt', label: 'Created', format: formatDate }
-      ],
-      rows: data?.contacts || []
-    },
-    {
-      id: 'join',
-      title: 'Join Requests',
-      count: data?.counts?.joinRequests || 0,
-      columns: [
-        { key: 'fullName', label: 'Name' },
-        { key: 'mobileNumber', label: 'Mobile' },
-        { key: 'emailId', label: 'Email' },
-        { key: 'profession', label: 'Profession' },
-        { key: 'payment_status', label: 'Status' },
-        { key: 'razorpay_payment_id', label: 'Payment ID' },
-        { key: 'dateOfBirth', label: 'DOB' },
-        { key: 'createdAt', label: 'Created', format: formatDate }
-      ],
-      rows: data?.joinRequests || []
-    },
-    {
-      id: 'advisor',
-      title: 'Advisor Applications',
-      count: data?.counts?.advisorApplications || 0,
-      columns: [
-        { key: 'fullName', label: 'Name' },
-        { key: 'mobileNumber', label: 'Mobile' },
-        { key: 'emailId', label: 'Email' },
-        { key: 'profession', label: 'Profession' },
-        { key: 'irdaLicense', label: 'IRDAI' },
-        { key: 'dateOfBirth', label: 'DOB' },
-        { key: 'createdAt', label: 'Created', format: formatDate }
-      ],
-      rows: data?.advisorApplications || []
-    },
-    {
-      id: 'newsletter',
-      title: 'Newsletter Subs',
-      count: data?.counts?.newsletterSubscriptions || 0,
-      columns: [
-        { key: 'email', label: 'Email' },
-        { key: 'createdAt', label: 'Created', format: formatDate }
-      ],
-      rows: data?.newsletterSubscriptions || []
+    setLoading(true);
+    setError('');
+    try {
+      await request('/api/admin/login', {
+        method: 'POST',
+        data: { username, password },
+        includeCredentials: true
+      });
+      setAuthToken('active');
+      localStorage.setItem('isAdminLoggedIn', 'true');
+      fetchDashboard('active');
+    } catch (err) {
+      setError(err.data?.error || 'Login failed');
+    } finally {
+      setLoading(false);
     }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await request('/api/admin/logout', { method: 'POST', includeCredentials: true });
+    } catch (err) { /* ignore */ }
+    setAuthToken('');
+    localStorage.removeItem('isAdminLoggedIn');
+    setData(null);
+  };
+
+  // Columns Definition
+  const joinColumns = [
+    { key: 'fullName', label: 'Name' },
+    { key: 'mobileNumber', label: 'Mobile' },
+    { key: 'emailId', label: 'Email' },
+    { key: 'profession', label: 'Profession' },
+    {
+      key: 'payment_status',
+      label: 'Pay Status',
+      format: (val) => <span className={`badge ${val === 'Paid' ? 'bg-success' : 'bg-warning text-dark'}`}>{val || 'Pending'}</span>
+    },
+    { key: 'razorpay_payment_id', label: 'Pay ID' },
+    { key: 'createdAt', label: 'Registered', format: formatDate }
   ];
 
-  const activeSheetData = sheets.find((sheet) => sheet.id === activeSheet) || sheets[0];
+  const contactColumns = [
+    { key: 'fullName', label: 'Name' },
+    { key: 'email', label: 'Email' },
+    { key: 'phoneNumber', label: 'Phone' },
+    { key: 'subject', label: 'Subject' },
+    { key: 'createdAt', label: 'Date', format: formatDate }
+  ];
 
-  return (
-    <div className="container py-5 dashboard-page">
-      <div className="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
-        <div>
-          <h2 className="mb-1">Submissions Dashboard</h2>
-          <p className="text-muted mb-0">Excel-style sheets for each form.</p>
-        </div>
-        <button className="btn btn-outline-primary" onClick={fetchDashboard} disabled={loading}>
-          {loading ? 'Refreshing...' : 'Refresh'}
-        </button>
-      </div>
+  const advisorColumns = [
+    { key: 'fullName', label: 'Name' },
+    { key: 'mobileNumber', label: 'Mobile' },
+    { key: 'irdaLicense', label: 'IRDA License' },
+    { key: 'createdAt', label: 'Date', format: formatDate }
+  ];
 
-      {!authToken && (
-        <div className="card login-card">
-          <div className="card-body">
-            <h5 className="card-title mb-3">Admin Login</h5>
-            {error && <div className="alert alert-danger py-2">{error}</div>}
-            <form className="row g-2" onSubmit={handleLogin}>
-              <div className="col-12 col-md-4">
+  // Login View
+  if (!authToken) {
+    return (
+      <div className="login-container d-flex align-items-center justify-content-center" style={{ minHeight: '80vh', background: '#f8f9fa' }}>
+        <div className="card shadow-lg border-0" style={{ maxWidth: '400px', width: '100%' }}>
+          <div className="card-body p-5">
+            <div className="text-center mb-4">
+              <img src="/images/mudralya_logo.webp" alt="Logo" height="50" className="mb-3" />
+              <h4 className="fw-bold text-dark">Admin Portal</h4>
+              <p className="text-muted small">Sign in to manage dashboard</p>
+            </div>
+            {error && <div className="alert alert-danger py-2 mb-3 small">{error}</div>}
+            <form onSubmit={handleLogin}>
+              <div className="mb-3">
+                <label className="form-label small fw-bold">Username</label>
                 <input
                   type="text"
                   className="form-control"
-                  placeholder="Username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  autoComplete="username"
+                  value={username} onChange={e => setUsername(e.target.value)}
                   required
                 />
               </div>
-              <div className="col-12 col-md-4">
+              <div className="mb-4">
+                <label className="form-label small fw-bold">Password</label>
                 <input
                   type="password"
                   className="form-control"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
+                  value={password} onChange={e => setPassword(e.target.value)}
                   required
                 />
               </div>
-              <div className="col-12 col-md-4 d-flex align-items-center">
-                <button className="btn btn-primary w-100" type="submit" disabled={loading}>
-                  {loading ? 'Signing in...' : 'Sign in'}
-                </button>
-              </div>
+              <button className="btn btn-primary w-100 fw-bold py-2" disabled={loading}>
+                {loading ? <div className="spinner-border spinner-border-sm"></div> : 'Sign In'}
+              </button>
             </form>
           </div>
         </div>
-      )}
+      </div>
+    );
+  }
 
-      {authToken && (
+  const handleDelete = async (type, id) => {
+    setLoading(true);
+    try {
+      let endpoint = '';
+      if (type === 'join') endpoint = `/api/join/${id}`;
+      if (type === 'contact') endpoint = `/api/contact/${id}`;
+      if (type === 'advisor') endpoint = `/api/advisor/${id}`;
+
+      await request(endpoint, {
+        method: 'DELETE',
+        includeCredentials: true
+      });
+
+      // Refresh Data
+      fetchDashboard('active');
+    } catch (err) {
+      console.error('Delete failed', err);
+      alert('Failed to delete entry');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Authenticated Layout
+  return (
+    <AdminLayout activeTab={activeTab} setActiveTab={setActiveTab} onLogout={handleLogout}>
+      {activeTab === 'overview' && (
         <>
-          {error && (
-            <div className="alert alert-danger">
-              {error}
+          <StatsOverview data={data} />
+          <div className="row mt-4">
+            <div className="col-lg-8">
+              <DataTable
+                title="Recent Registrations"
+                columns={joinColumns}
+                data={data?.joinRequests?.slice(0, 5) || []}
+                onDelete={(id) => handleDelete('join', id)}
+              />
             </div>
-          )}
-
-          {loading && (
-            <div className="text-center my-4">
-              <div className="spinner-border text-primary" role="status"></div>
-            </div>
-          )}
-
-          {data && (
-            <>
-              <div className="row g-3 mb-3">
-                {sheets.map((card) => (
-                  <div className="col-6 col-md-3" key={card.id}>
-                    <div className="card stat-card">
-                      <div className="card-body">
-                        <p className="text-muted mb-1">{card.title}</p>
-                        <h4 className="mb-0">{card.count}</h4>
+            <div className="col-lg-4">
+              {/* Simple Activity Feed or Smaller Table */}
+              <div className="card border-0 shadow-sm h-100">
+                <div className="card-header bg-white py-3">
+                  <h6 className="mb-0 fw-bold">Recent Messages</h6>
+                </div>
+                <div className="list-group list-group-flush">
+                  {data?.contacts?.slice(0, 5).map((msg, i) => (
+                    <div key={i} className="list-group-item">
+                      <div className="d-flex justify-content-between">
+                        <small className="fw-bold">{msg.fullName}</small>
+                        <small className="text-muted" style={{ fontSize: '0.7rem' }}>{formatDate(msg.createdAt).split(',')[0]}</small>
                       </div>
+                      <p className="mb-0 small text-truncate text-muted">{msg.subject || 'No subject'}</p>
                     </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="sheet-tabs">
-                {sheets.map((sheet) => (
-                  <button
-                    key={sheet.id}
-                    type="button"
-                    className={`sheet-tab ${activeSheet === sheet.id ? 'active' : ''}`}
-                    onClick={() => setActiveSheet(sheet.id)}
-                  >
-                    <span className="sheet-title">{sheet.title}</span>
-                    <span className="sheet-count badge">{sheet.count}</span>
-                  </button>
-                ))}
-              </div>
-
-              <div className="sheet-surface">
-                <div className="d-flex justify-content-between align-items-center sheet-header">
-                  <div>
-                    <h5 className="mb-0">{activeSheetData.title}</h5>
-                    <small className="text-muted">Rows: {activeSheetData.rows.length}</small>
-                  </div>
-                  <div className="text-muted small">Auto-refresh via Refresh button</div>
-                  <div className="d-flex align-items-center gap-2">
-                    <button className="btn btn-sm btn-outline-secondary" onClick={fetchDashboard} disabled={loading}>
-                      {loading ? 'Refreshing...' : 'Refresh'}
-                    </button>
-                    <button className="btn btn-sm btn-outline-danger" onClick={handleLogout}>
-                      Logout
-                    </button>
-                  </div>
-                </div>
-                <div className="table-responsive sheet-table">
-                  <table className="table table-sm mb-0 align-middle">
-                    <thead>
-                      <tr>
-                        <th className="row-number-col">#</th>
-                        {activeSheetData.columns.map((col) => (
-                          <th key={col.key}>{col.label}</th>
-                        ))}
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {activeSheetData.rows.length === 0 && (
-                        <tr>
-                          <td colSpan={activeSheetData.columns.length + 1} className="text-center text-muted">
-                            No records yet
-                          </td>
-                        </tr>
-                      )}
-                      {activeSheetData.rows.map((row, idx) => (
-                        <tr key={row._id || idx}>
-                          <td className="row-number-col text-muted">{idx + 1}</td>
-                          {activeSheetData.columns.map((col) => (
-                            <td key={col.key}>
-                              {col.format ? col.format(row[col.key], row) : row[col.key] || '-'}
-                            </td>
-                          ))}
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                  ))}
                 </div>
               </div>
-            </>
-          )}
+            </div>
+          </div>
         </>
       )}
-    </div>
+
+      {activeTab === 'join' && (
+        <DataTable
+          title="Join Partnership Requests"
+          columns={joinColumns}
+          data={data?.joinRequests || []}
+          onDelete={(id) => handleDelete('join', id)}
+        />
+      )}
+
+      {activeTab === 'contacts' && (
+        <DataTable
+          title="Contact Inquiries"
+          columns={contactColumns}
+          data={data?.contacts || []}
+          onDelete={(id) => handleDelete('contact', id)}
+        />
+      )}
+
+      {activeTab === 'advisor' && (
+        <DataTable
+          title="Advisor Applications"
+          columns={advisorColumns}
+          data={data?.advisorApplications || []}
+          onDelete={(id) => handleDelete('advisor', id)}
+        />
+      )}
+
+      {activeTab === 'tasks' && (
+        <TaskManager />
+      )}
+    </AdminLayout>
   );
 };
 

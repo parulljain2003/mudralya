@@ -3,8 +3,28 @@ const { z } = require('zod');
 const { persistDocument } = require('../utils/persistence');
 const { getDb } = require('../config/db');
 const { ObjectId } = require('mongodb');
+const { adminSession } = require('../middleware/session');
 
 const router = Router();
+
+router.delete('/:id', adminSession, async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    if (!ObjectId.isValid(id)) {
+      return res.status(400).json({ error: 'Invalid ID' });
+    }
+
+    const result = await getDb().collection('join_requests').deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ error: 'Entry not found' });
+    }
+
+    return res.json({ message: 'Entry deleted successfully', success: true });
+  } catch (err) {
+    return next(err);
+  }
+});
 
 // Schema for payment update
 const paymentUpdateSchema = z.object({
