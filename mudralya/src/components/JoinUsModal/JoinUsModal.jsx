@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import './JoinUsModal.css';
 import { request } from '../../api/client';
+import JoinUsSuccess from './JoinUsSuccess';
 
 const JoinUsModal = ({ isOpen, onClose }) => {
     const [formData, setFormData] = useState({
@@ -8,10 +9,12 @@ const JoinUsModal = ({ isOpen, onClose }) => {
         mobileNumber: '',
         emailId: '',
         dateOfBirth: '',
-        profession: ''
+        profession: '',
+        plan: ''
     });
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
+    const [submitted, setSubmitted] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -19,6 +22,29 @@ const JoinUsModal = ({ isOpen, onClose }) => {
             ...prev,
             [name]: value
         }));
+    };
+
+    const handleClose = (fromSuccess = false) => {
+        if (fromSuccess) {
+            alert('You are registered successfully with us');
+        }
+
+        setSubmitted(false);
+        setFormData({
+            fullName: '',
+            mobileNumber: '',
+            emailId: '',
+            dateOfBirth: '',
+            profession: '',
+            plan: ''
+        });
+        onClose();
+    };
+
+    const handlePayment = () => {
+        // TODO: Integrate actual Razorpay payment gateway
+        alert('Redirecting to Razorpay payment gateway...');
+        // For now, let's keep the modal open or handle redirection logic here
     };
 
     const handleSubmit = async (e) => {
@@ -31,21 +57,14 @@ const JoinUsModal = ({ isOpen, onClose }) => {
                 method: 'POST',
                 data: formData
             });
-            alert('Thank you for your interest! We will contact you soon.');
-            onClose();
-            setFormData({
-                fullName: '',
-                mobileNumber: '',
-                emailId: '',
-                dateOfBirth: '',
-                profession: ''
-            });
+            // Show success screen instead of alert
+            setSubmitted(true);
         } catch (err) {
             if (err.data?.errors) {
                 const fieldErrors = Object.values(err.data.errors)
-                  .flat()
-                  .filter(Boolean)
-                  .join(', ');
+                    .flat()
+                    .filter(Boolean)
+                    .join(', ');
                 setSubmitError(fieldErrors || err.message);
             } else {
                 setSubmitError(err.message || 'Failed to submit. Please try again.');
@@ -57,8 +76,21 @@ const JoinUsModal = ({ isOpen, onClose }) => {
 
     if (!isOpen) return null;
 
+    if (submitted) {
+        return (
+            <div className="modal-overlay" onClick={() => handleClose(true)}>
+                <div className="join-us-modal success-mode" onClick={(e) => e.stopPropagation()}>
+                    <JoinUsSuccess
+                        onClose={() => handleClose(true)}
+                        onPayment={handlePayment}
+                    />
+                </div>
+            </div>
+        );
+    }
+
     return (
-        <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-overlay" onClick={() => handleClose(false)}>
             <div className="join-us-modal" onClick={(e) => e.stopPropagation()}>
                 {/* Left Side - Illustration */}
                 <div className="modal-left">
@@ -76,14 +108,14 @@ const JoinUsModal = ({ isOpen, onClose }) => {
 
                 {/* Right Side - Form */}
                 <div className="modal-right">
-                    <button className="modal-close" onClick={onClose}>
+                    <button className="modal-close" onClick={handleClose}>
                         <i className="fas fa-times"></i>
                     </button>
 
-                    <h2 className="modal-title">Become a Partner</h2>
+                    <h2 className="modal-title">Become our Partner</h2>
                     <p className="modal-subtitle">
-                        It will take a couple of minutes,<br />
-                        to fill this form so that we can assist you accordingly!
+                        Join Mudralaya today and start earning by completing<br />
+                        simple, easy tasks of your choice—anytime, anywhere!
                     </p>
                     {submitError && (
                         <div className="alert alert-danger py-2">
@@ -100,7 +132,7 @@ const JoinUsModal = ({ isOpen, onClose }) => {
                                 type="text"
                                 id="fullName"
                                 name="fullName"
-                                placeholder="Enter your full name"
+                                placeholder="Kunal"
                                 value={formData.fullName}
                                 onChange={handleChange}
                                 required
@@ -113,7 +145,7 @@ const JoinUsModal = ({ isOpen, onClose }) => {
                                 type="tel"
                                 id="mobileNumber"
                                 name="mobileNumber"
-                                placeholder="Enter your mobile number"
+                                placeholder="8899883638"
                                 value={formData.mobileNumber}
                                 onChange={handleChange}
                                 required
@@ -126,7 +158,7 @@ const JoinUsModal = ({ isOpen, onClose }) => {
                                 type="email"
                                 id="emailId"
                                 name="emailId"
-                                placeholder="Enter your email"
+                                placeholder="kunaldalotra02@gmail.com"
                                 value={formData.emailId}
                                 onChange={handleChange}
                             />
@@ -159,6 +191,23 @@ const JoinUsModal = ({ isOpen, onClose }) => {
                                 <option value="house-wife">House Wife</option>
                                 <option value="business-man">Business Man</option>
                                 <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div className="form-group">
+                            <label htmlFor="plan">Plan*</label>
+                            <select
+                                id="plan"
+                                name="plan"
+                                value={formData.plan}
+                                onChange={handleChange}
+                                required
+                            >
+                                <option value="">Select plan</option>
+                                <option value="free">Free</option>
+                                <option value="individual">Individual</option>
+                                <option value="business-solution">Business Solution</option>
+                                <option value="startup-launch-lab">Startup Launch Lab</option>
                             </select>
                         </div>
 
