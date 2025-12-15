@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import './JoinUsModal.css';
 import { request } from '../../api/client';
 import JoinUsSuccess from './JoinUsSuccess';
+import SuccessPopup from '../SuccessPopup/SuccessPopup';
 
 const JoinUsModal = ({ isOpen, onClose }) => {
     const [formData, setFormData] = useState({
@@ -15,6 +16,7 @@ const JoinUsModal = ({ isOpen, onClose }) => {
     const [submitting, setSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [submitted, setSubmitted] = useState(false);
+    const [showFinalSuccessPopup, setShowFinalSuccessPopup] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -24,12 +26,9 @@ const JoinUsModal = ({ isOpen, onClose }) => {
         }));
     };
 
-    const handleClose = (fromSuccess = false) => {
-        if (fromSuccess) {
-            alert('You are registered successfully with us');
-        }
-
+    const resetAndClose = () => {
         setSubmitted(false);
+        setShowFinalSuccessPopup(false);
         setFormData({
             fullName: '',
             mobileNumber: '',
@@ -41,10 +40,68 @@ const JoinUsModal = ({ isOpen, onClose }) => {
         onClose();
     };
 
-    const handlePayment = () => {
-        // TODO: Integrate actual Razorpay payment gateway
-        alert('Redirecting to Razorpay payment gateway...');
-        // For now, let's keep the modal open or handle redirection logic here
+    const handleClose = (fromSuccess = false) => {
+        if (fromSuccess) {
+            // content for success popup
+            setShowFinalSuccessPopup(true);
+            // Don't close immediately, let the popup show
+        } else {
+            resetAndClose();
+        }
+    };
+
+    const loadRazorpayScript = () => {
+        return new Promise((resolve) => {
+            const script = document.createElement('script');
+            script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+            script.onload = () => {
+                resolve(true);
+            };
+            script.onerror = () => {
+                resolve(false);
+            };
+            document.body.appendChild(script);
+        });
+    };
+
+    const handlePayment = async () => {
+        const res = await loadRazorpayScript();
+
+        if (!res) {
+            alert('Razorpay SDK failed to load. Are you online?');
+            return;
+        }
+
+        // Create options for Razorpay Checkout
+        // NOTE: Replace 'YOUR_RAZORPAY_KEY_ID' with your actual key
+        const options = {
+            key: 'rzp_test_Rr4pA3QSvG4gpv',
+            amount: 9900, // Amount is in currency subunits. Default currency is INR. Hence, 9900 refers to 99 INR
+            currency: 'INR',
+            name: 'Mudralaya',
+            description: 'Partner Membership Fee',
+            image: '/images/mudralya_logo.webp', // Optional: logo
+            handler: function (response) {
+                // Payment success handler
+                console.log(response.razorpay_payment_id);
+                // After successful payment, we can show the final success popup and close
+                handleClose(true);
+            },
+            prefill: {
+                name: formData.fullName,
+                email: formData.emailId,
+                contact: formData.mobileNumber
+            },
+            notes: {
+                address: 'Mudralaya Office'
+            },
+            theme: {
+                color: '#00a0dc'
+            }
+        };
+
+        const paymentObject = new window.Razorpay(options);
+        paymentObject.open();
     };
 
     const handleSubmit = async (e) => {
@@ -73,6 +130,16 @@ const JoinUsModal = ({ isOpen, onClose }) => {
             setSubmitting(false);
         }
     };
+
+    // Render Final Success Popup if active
+    if (showFinalSuccessPopup) {
+        return (
+            <SuccessPopup
+                message="You are registered successfully with us"
+                onClose={resetAndClose}
+            />
+        );
+    }
 
     if (!isOpen) return null;
 
