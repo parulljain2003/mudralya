@@ -23,6 +23,11 @@ const corsOptions = {
       allowedOrigins.push(`https://${process.env.WEBSITE_HOSTNAME}`);
     }
 
+    // Explicitly allow production domains
+    allowedOrigins.push('https://mudralya.com');
+    allowedOrigins.push('https://www.mudralya.com');
+    allowedOrigins.push('https://mudralya-app.azurewebsites.net');
+
     if (!origin || allowedOrigins.length === 0) {
       return callback(null, true);
     }
