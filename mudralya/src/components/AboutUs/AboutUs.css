@@ -231,7 +231,7 @@
 
 /* About Us Hero Section */
 .about-us-hero-section {
-  min-height: 100vh;
+  /* min-height: 100vh; */
   display: flex;
   align-items: center;
   overflow: hidden;
@@ -853,9 +853,9 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
-  .about-us-page section {
+  /* .about-us-page section {
     padding: 2rem 0 !important;
-  }
+  } */
 
   .mission-card {
     min-height: auto;
