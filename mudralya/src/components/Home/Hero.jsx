@@ -5,6 +5,7 @@ import './Hero.css';
 
 const Hero = () => {
   const { openJoinUsModal } = useModal();
+  // navigate to contact page when user wants to talk to advisor
 
   return (
     <section className="hero-section">
