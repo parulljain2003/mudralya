@@ -130,6 +130,69 @@ const syncSchema = z.object({
     limit: z.coerce.number().min(1).max(200).default(50)
 });
 
+const normalizePhone = (value) => {
+    const digits = String(value || '').replace(/\D/g, '');
+    if (digits.length >= 10) return digits.slice(-10);
+    return digits;
+};
+
+const normalizeEmail = (value) => {
+    const email = String(value || '').trim().toLowerCase();
+    return email || null;
+};
+
+const parseDate = (value) => {
+    if (!value) return null;
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return null;
+    return d;
+};
+
+const getMembershipAmountSubunits = () => {
+    const amountInr = Number(process.env.MEMBERSHIP_AMOUNT_INR || 99);
+    if (!Number.isFinite(amountInr) || amountInr <= 0) return 9900;
+    return Math.round(amountInr * 100);
+};
+
+const fetchRecentPayments = async (from, to, maxCount = 500) => {
+    const pageSize = 100;
+    const items = [];
+
+    for (let skip = 0; skip < maxCount; skip += pageSize) {
+        // eslint-disable-next-line no-await-in-loop
+        const batch = await razorpay.payments.all({ from, to, count: pageSize, skip });
+        const page = Array.isArray(batch?.items) ? batch.items : [];
+        items.push(...page);
+        if (page.length < pageSize) break;
+    }
+
+    return items.slice(0, maxCount);
+};
+
+const indexPaymentsByPhone = (payments) => {
+    const map = new Map();
+    for (const payment of payments) {
+        const phone = normalizePhone(payment?.contact);
+        if (!phone) continue;
+        const list = map.get(phone) || [];
+        list.push(payment);
+        map.set(phone, list);
+    }
+    return map;
+};
+
+const indexPaymentsByOrderId = (payments) => {
+    const map = new Map();
+    for (const payment of payments) {
+        const orderId = typeof payment?.order_id === 'string' ? payment.order_id.trim() : '';
+        if (!orderId) continue;
+        const list = map.get(orderId) || [];
+        list.push(payment);
+        map.set(orderId, list);
+    }
+    return map;
+};
+
 // POST /api/payment/sync (admin-only)
 // Reconciles pending join_requests with Razorpay order/payment status.
 router.post('/sync', adminSession, async (req, res, next) => {
@@ -160,6 +223,24 @@ router.post('/sync', adminSession, async (req, res, next) => {
             .limit(limit)
             .toArray();
 
+        const expectedAmount = getMembershipAmountSubunits();
+        const createdAtDates = candidates
+            .map((row) => parseDate(row?.createdAt))
+            .filter(Boolean);
+        const earliest = createdAtDates.length
+            ? new Date(Math.min(...createdAtDates.map((d) => d.getTime())))
+            : new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+
+        const from = new Date(earliest.getTime() - 24 * 60 * 60 * 1000);
+        const to = new Date();
+
+        const recentPayments = await fetchRecentPayments(from, to, 500);
+        const eligiblePayments = recentPayments.filter((p) => p?.status === 'captured' && p?.amount === expectedAmount);
+        const paymentsByPhone = indexPaymentsByPhone(eligiblePayments);
+        const paymentsByOrderId = indexPaymentsByOrderId(eligiblePayments);
+        const paymentsById = new Map(eligiblePayments.filter((p) => p?.id).map((p) => [p.id, p]));
+        const usedPaymentIds = new Set();
+
         let scanned = 0;
         let updated = 0;
         const errors = [];
@@ -173,11 +254,61 @@ router.post('/sync', adminSession, async (req, res, next) => {
             try {
                 let capturedPayment = null;
                 let resolvedOrderId = orderId;
+                let checkedOrderId = null;
 
                 if (paymentId) {
-                    const payment = await razorpay.payments.fetch(paymentId);
-                    if (payment?.status === 'captured') {
-                        capturedPayment = payment;
+                    const cached = paymentsById.get(paymentId);
+                    if (cached) {
+                        capturedPayment = cached;
+                    } else {
+                        const payment = await razorpay.payments.fetch(paymentId);
+                        if (payment?.status === 'captured') {
+                            capturedPayment = payment;
+                        }
+                    }
+                }
+
+                if (!capturedPayment && resolvedOrderId) {
+                    checkedOrderId = resolvedOrderId;
+                    const cached = paymentsByOrderId.get(resolvedOrderId) || [];
+                    capturedPayment = cached[0] || null;
+
+                    if (!capturedPayment) {
+                        const payments = await razorpay.orders.fetchPayments(resolvedOrderId);
+                        const items = Array.isArray(payments?.items) ? payments.items : [];
+                        capturedPayment = items.find((p) => p?.status === 'captured') || null;
+                    }
+                }
+
+                if (!capturedPayment) {
+                    const joinPhone = normalizePhone(row?.mobileNumber);
+                    const joinEmail = normalizeEmail(row?.emailId);
+                    const joinCreatedAt = parseDate(row?.createdAt);
+                    const candidatesByPhone = joinPhone ? (paymentsByPhone.get(joinPhone) || []) : [];
+
+                    const windowMs = joinEmail ? 24 * 60 * 60 * 1000 : 60 * 60 * 1000;
+                    const matches = candidatesByPhone
+                        .filter((p) => p?.id && !usedPaymentIds.has(p.id))
+                        .filter((p) => {
+                            if (!joinEmail) return true;
+                            return normalizeEmail(p?.email) === joinEmail;
+                        })
+                        .map((p) => {
+                            const createdAtMs = typeof p?.created_at === 'number' ? p.created_at * 1000 : null;
+                            const diffMs = createdAtMs && joinCreatedAt ? Math.abs(createdAtMs - joinCreatedAt.getTime()) : null;
+                            return { payment: p, diffMs };
+                        })
+                        .filter((entry) => entry.diffMs !== null && entry.diffMs <= windowMs)
+                        .sort((a, b) => a.diffMs - b.diffMs);
+
+                    if (matches.length === 1) {
+                        capturedPayment = matches[0].payment;
+                        resolvedOrderId = resolvedOrderId || capturedPayment?.order_id || '';
+                    } else if (matches.length > 1) {
+                        errors.push({
+                            id: String(row._id),
+                            message: 'Multiple matching captured payments found for this contact/email; cannot auto-reconcile.'
+                        });
                     }
                 }
 
@@ -194,10 +325,16 @@ router.post('/sync', adminSession, async (req, res, next) => {
                     }
                 }
 
-                if (!capturedPayment && resolvedOrderId) {
-                    const payments = await razorpay.orders.fetchPayments(resolvedOrderId);
-                    const items = Array.isArray(payments?.items) ? payments.items : [];
-                    capturedPayment = items.find((p) => p?.status === 'captured') || null;
+                if (!capturedPayment && resolvedOrderId && checkedOrderId !== resolvedOrderId) {
+                    checkedOrderId = resolvedOrderId;
+                    const cached = paymentsByOrderId.get(resolvedOrderId) || [];
+                    capturedPayment = cached[0] || null;
+
+                    if (!capturedPayment) {
+                        const payments = await razorpay.orders.fetchPayments(resolvedOrderId);
+                        const items = Array.isArray(payments?.items) ? payments.items : [];
+                        capturedPayment = items.find((p) => p?.status === 'captured') || null;
+                    }
                 }
 
                 if (!capturedPayment) {
@@ -221,6 +358,7 @@ router.post('/sync', adminSession, async (req, res, next) => {
 
                 if (updateResult.modifiedCount > 0) {
                     updated += 1;
+                    if (nextPaymentId) usedPaymentIds.add(nextPaymentId);
                 }
             } catch (err) {
                 errors.push({

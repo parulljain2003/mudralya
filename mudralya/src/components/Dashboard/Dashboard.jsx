@@ -119,6 +119,7 @@ const Dashboard = () => {
       format: (val) => <span className={`badge ${val === 'Paid' ? 'bg-success' : 'bg-warning text-dark'}`}>{val || 'Pending'}</span>
     },
     { key: 'razorpay_payment_id', label: 'Pay ID' },
+    { key: 'razorpay_order_id', label: 'Order ID' },
     { key: 'createdAt', label: 'Registered', format: formatDate }
   ];
 
