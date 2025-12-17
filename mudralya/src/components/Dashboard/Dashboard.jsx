@@ -101,7 +101,12 @@ const Dashboard = () => {
       alert(`Payment sync complete: ${res.updated || 0} updated (scanned ${res.scanned || 0}). Errors: ${(res.errors || []).length}`);
     } catch (err) {
       console.error(err);
-      alert(err.data?.error || err.message || 'Payment sync failed');
+      if (err.status === 401) {
+        alert('Session expired. Please log in again and retry.');
+      } else {
+        const details = [err.data?.error, err.data?.message].filter(Boolean).join(': ');
+        alert(details || err.message || 'Payment sync failed');
+      }
     } finally {
       setSyncingPayments(false);
     }

@@ -234,7 +234,24 @@ router.post('/sync', adminSession, async (req, res, next) => {
         const from = new Date(earliest.getTime() - 24 * 60 * 60 * 1000);
         const to = new Date();
 
-        const recentPayments = await fetchRecentPayments(from, to, 500);
+        const fromSec = Math.floor(from.getTime() / 1000);
+        const toSec = Math.floor(to.getTime() / 1000);
+
+        let recentPayments = [];
+        try {
+            recentPayments = await fetchRecentPayments(fromSec, toSec, 500);
+        } catch (err) {
+            const statusCode = err?.statusCode || err?.status || 500;
+            const code = err?.error?.code || err?.code;
+            const message = err?.error?.description || err?.error?.message || err?.message || 'Razorpay request failed';
+            // eslint-disable-next-line no-console
+            console.error('Razorpay payments.all failed', { statusCode, code, message });
+            return res.status(502).json({
+                error: `Razorpay API error (${statusCode})`,
+                code,
+                message
+            });
+        }
         const eligiblePayments = recentPayments.filter((p) => p?.status === 'captured' && p?.amount === expectedAmount);
         const paymentsByPhone = indexPaymentsByPhone(eligiblePayments);
         const paymentsByOrderId = indexPaymentsByOrderId(eligiblePayments);
