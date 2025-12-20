@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import './JoinUsModal.css';
+import { useModal } from '../../context/ModalContext';
 import { request } from '../../api/client';
 import JoinUsSuccess from './JoinUsSuccess';
 import SuccessPopup from '../SuccessPopup/SuccessPopup';
 import MembershipCard from '../MembershipCard/MembershipCard';
 
 const JoinUsModal = ({ isOpen, onClose, initialPlan = '' }) => {
+    const { modalData } = useModal();
     const [formData, setFormData] = useState({
         fullName: '',
         mobileNumber: '',
@@ -82,8 +84,10 @@ const JoinUsModal = ({ isOpen, onClose, initialPlan = '' }) => {
         });
     };
 
-    const handlePayment = async () => {
-        if (!submissionId) {
+    const handlePayment = async (overrideSubmissionId = null, overrideAmount = null) => {
+        const activeSubmissionId = overrideSubmissionId || submissionId;
+
+        if (!activeSubmissionId) {
             alert('Please submit your details first, then proceed for payment.');
             return;
         }
@@ -99,16 +103,26 @@ const JoinUsModal = ({ isOpen, onClose, initialPlan = '' }) => {
             return;
         }
 
+        // Determine amount: override -> context -> default
+        let amountToPay = 99; // Default
+        if (overrideAmount) {
+            amountToPay = overrideAmount;
+        } else if (modalData?.finalPrice) {
+            // Parse "₹5,000" or similar strings to number
+            const extracted = String(modalData.finalPrice).replace(/[^0-9]/g, '');
+            amountToPay = extracted ? Number(extracted) : 99;
+        }
+
         // 1. Create Order on Backend
         let orderData;
         try {
             orderData = await request('/api/payment/order', {
                 method: 'POST',
                 data: {
-                    amount: 99, // Amount in INR
+                    amount: amountToPay,
                     currency: 'INR',
-                    receipt: `join_${submissionId}`,
-                    submissionId
+                    receipt: `join_${activeSubmissionId}`,
+                    submissionId: activeSubmissionId
                 }
             });
         } catch (err) {
@@ -138,14 +152,16 @@ const JoinUsModal = ({ isOpen, onClose, initialPlan = '' }) => {
                     await request('/api/payment/verify', {
                         method: 'POST',
                         data: {
-                            submissionId: submissionId,
+                            submissionId: activeSubmissionId,
                             razorpay_payment_id: response.razorpay_payment_id,
                             razorpay_order_id: response.razorpay_order_id,
                             razorpay_signature: response.razorpay_signature
                         }
                     });
 
-                    setShowMembership(true); // Show membership card only after successful verification
+                    // For individual plan, we might want to close or show success
+                    // The original flow shows MembershipCard
+                    setShowMembership(true);
                 } catch (error) {
                     console.error('Failed to verify payment', error);
                     alert(
@@ -181,15 +197,43 @@ const JoinUsModal = ({ isOpen, onClose, initialPlan = '' }) => {
 
         setSubmitting(true);
         try {
+            // Prepare payload with extra fields if available
+            const payload = { ...formData };
+            if (modalData?.hasLaptop !== undefined) {
+                payload.hasLaptop = modalData.hasLaptop;
+            }
+
+            // Calculate amount for backend storage (optional, but good for record)
+            let calculatedAmount = 99;
+            if (formData.plan === 'individual' && modalData?.finalPrice) {
+                const extracted = String(modalData.finalPrice).replace(/[^0-9]/g, '');
+                calculatedAmount = extracted ? Number(extracted) : 99;
+            }
+            payload.amount = calculatedAmount;
+
             const response = await request('/api/join', {
                 method: 'POST',
-                data: formData
+                data: payload
             });
+
+            let newSubmissionId = null;
             if (response.id) {
                 setSubmissionId(response.id);
+                newSubmissionId = response.id;
             }
-            // Show success screen instead of alert
-            setSubmitted(true);
+
+            // JOIN LOGIC SPLIT
+            if (formData.plan === 'individual') {
+                // Direct Payment Flow
+                // We pass the new ID and amount directly because state updates (setSubmissionId) are async
+                await handlePayment(newSubmissionId, calculatedAmount);
+                // We do NOT setSubmitted(true) here to avoid the intermediate "JoinUsSuccess" popup
+                // If payment is successful, handlePayment sets ShowMembership(true)
+            } else {
+                // Standard Flow
+                setSubmitted(true);
+            }
+
         } catch (err) {
             if (err.data?.errors) {
                 const fieldErrors = Object.values(err.data.errors)

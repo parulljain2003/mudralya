@@ -119,6 +119,16 @@ const Dashboard = () => {
     { key: 'emailId', label: 'Email' },
     { key: 'profession', label: 'Profession' },
     {
+      key: 'hasLaptop',
+      label: 'Laptop',
+      format: val => val ? 'Yes' : (val === false ? 'No' : '-')
+    },
+    {
+      key: 'amount',
+      label: 'Amount (₹)',
+      format: val => val ? val.toLocaleString() : '-'
+    },
+    {
       key: 'payment_status',
       label: 'Pay Status',
       format: (val) => <span className={`badge ${val === 'Paid' ? 'bg-success' : 'bg-warning text-dark'}`}>{val || 'Pending'}</span>

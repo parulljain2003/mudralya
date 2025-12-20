@@ -6,14 +6,18 @@ export const ModalProvider = ({ children }) => {
     const [isJoinUsModalOpen, setIsJoinUsModalOpen] = useState(false);
     const [selectedPlan, setSelectedPlan] = useState('');
 
-    const openJoinUsModal = (plan = '') => {
+    const [modalData, setModalData] = useState({});
+
+    const openJoinUsModal = (plan = '', data = {}) => {
         setSelectedPlan(plan);
+        setModalData(data);
         setIsJoinUsModalOpen(true);
     };
 
     const closeJoinUsModal = () => {
         setIsJoinUsModalOpen(false);
         setSelectedPlan('');
+        setModalData({});
     };
 
     return (
@@ -21,6 +25,7 @@ export const ModalProvider = ({ children }) => {
             value={{
                 isJoinUsModalOpen,
                 selectedPlan,
+                modalData,
                 openJoinUsModal,
                 closeJoinUsModal
             }}
