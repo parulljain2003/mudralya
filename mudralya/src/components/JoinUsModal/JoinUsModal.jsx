@@ -108,13 +108,19 @@ const JoinUsModal = ({ isOpen, onClose, initialPlan = '' }) => {
         }
 
         // Determine amount: override -> context -> default
-        let amountToPay = 99; // Default
+        let amountToPay = 99; // Default backup
+
         if (safeAmount) {
             amountToPay = safeAmount;
-        } else if (modalData?.finalPrice) {
-            // Parse "₹5,000" or similar strings to number
+        } else if (formData.plan === 'individual' && modalData?.finalPrice) {
+            // Parse "₹5,000" -> 5000
             const extracted = String(modalData.finalPrice).replace(/[^0-9]/g, '');
-            amountToPay = extracted ? Number(extracted) : 99;
+            const parsed = extracted ? Number(extracted) : 0;
+            if (parsed > 0) amountToPay = parsed;
+        } else {
+            // For other plans (Free, Business) that go through "JoinUsSuccess", 
+            // the fee is 99 regardless of initialPrice being 0.
+            amountToPay = 99;
         }
 
         // 1. Create Order on Backend
