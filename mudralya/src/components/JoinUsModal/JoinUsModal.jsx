@@ -85,7 +85,11 @@ const JoinUsModal = ({ isOpen, onClose, initialPlan = '' }) => {
     };
 
     const handlePayment = async (overrideSubmissionId = null, overrideAmount = null) => {
-        const activeSubmissionId = overrideSubmissionId || submissionId;
+        // Sanitize inputs: If called via onClick, first arg is an Event object
+        const safeSubmissionId = (typeof overrideSubmissionId === 'string') ? overrideSubmissionId : null;
+        const safeAmount = (typeof overrideAmount === 'number') ? overrideAmount : null;
+
+        const activeSubmissionId = safeSubmissionId || submissionId;
 
         if (!activeSubmissionId) {
             alert('Please submit your details first, then proceed for payment.');
@@ -105,8 +109,8 @@ const JoinUsModal = ({ isOpen, onClose, initialPlan = '' }) => {
 
         // Determine amount: override -> context -> default
         let amountToPay = 99; // Default
-        if (overrideAmount) {
-            amountToPay = overrideAmount;
+        if (safeAmount) {
+            amountToPay = safeAmount;
         } else if (modalData?.finalPrice) {
             // Parse "₹5,000" or similar strings to number
             const extracted = String(modalData.finalPrice).replace(/[^0-9]/g, '');
