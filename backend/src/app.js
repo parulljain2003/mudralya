@@ -12,6 +12,7 @@ const newsletterRouter = require("./routes/newsletter");
 const dashboardRouter = require("./routes/dashboard");
 const paymentRouter = require("./routes/payment");
 const adminRouter = require("./routes/admin");
+const authRouter = require("./routes/auth");
 const { adminSession } = require("./middleware/session");
 
 const app = express();
@@ -92,6 +93,7 @@ app.use("/api/advisor", advisorRouter);
 app.use("/api/newsletter", newsletterRouter);
 app.use("/api/admin", adminRouter);
 app.use("/api/payment", paymentRouter);
+app.use("/api/auth", authRouter);
 app.use("/api/dashboard", adminSession, dashboardRouter);
 
 // Serve index.html for any unknown routes (SPA support) - MUST be after API routes

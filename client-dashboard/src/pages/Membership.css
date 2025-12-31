@@ -1,0 +1,169 @@
+/* Page Container */
+.membership-page {
+  padding: 40px;
+  background-color: #f8f9fa;
+  min-height: 100vh;
+  font-family: "Outfit", sans-serif;
+  color: #333;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Header Section */
+.membership-header {
+  margin-bottom: 40px;
+}
+
+.membership-header h1 {
+  font-size: 36px;
+  font-weight: 600;
+  margin: 0 0 12px 0;
+  color: #1a1a1a;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 32px;
+}
+
+/* Toggle Switch */
+.plan-toggle {
+  display: inline-flex;
+  background: #fff;
+  padding: 6px;
+  border-radius: 30px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  margin-bottom: 40px;
+}
+
+.toggle-option {
+  padding: 10px 24px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  background: transparent;
+  transition: all 0.3s ease;
+  color: #666;
+}
+
+.toggle-option.active {
+  background-color: #00bcd4; /* Teal/Blue from screenshot */
+  color: white;
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.3);
+}
+
+/* Main Content Layout */
+.membership-content {
+  display: flex;
+  justify-content: flex-end; /* Push content to right as per design (left side is open) */
+  position: relative;
+}
+
+/* Benefits Grid */
+.benefits-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 40px 60px;
+  max-width: 800px;
+}
+
+.benefit-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.benefit-number-box {
+  width: 50px;
+  height: 50px;
+  background: #fff;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+  color: #00bcd4;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  font-style: italic; /* Matches screenshot number style */
+}
+
+.benefit-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #000;
+  margin: 0;
+}
+
+.benefit-desc {
+  font-size: 14px;
+  color: #888;
+  line-height: 1.6;
+  margin: 0;
+  max-width: 300px;
+}
+
+/* Footer Section (Price + Buy Button) */
+.membership-footer {
+  position: fixed; /* Or absolute bottom */
+  bottom: 40px;
+  right: 40px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+}
+
+.price-text {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.price-amount {
+  color: #00bcd4;
+  font-weight: 700;
+}
+
+.buy-btn {
+  background-color: #2196f3; /* Brighter blue for CTA */
+  color: white;
+  padding: 16px 40px;
+  border-radius: 30px;
+  border: none;
+  font-size: 18px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 8px 24px rgba(33, 150, 243, 0.3);
+  transition: transform 0.2s;
+}
+
+.buy-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(33, 150, 243, 0.4);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .membership-content {
+    justify-content: flex-start;
+  }
+
+  .benefits-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .membership-footer {
+    position: relative;
+    bottom: auto;
+    right: auto;
+    margin-top: 60px;
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}

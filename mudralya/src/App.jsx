@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Header from './components/Header/Header.jsx';
 import Footer from './components/Footer/Footer.jsx';
 import JoinUsModal from './components/JoinUsModal/JoinUsModal.jsx';
+import LoginModal from './components/Auth/LoginModal.jsx';
 import { ModalProvider, useModal } from './context/ModalContext.jsx';
 import './App.css';
 
@@ -25,7 +26,7 @@ const Loading = () => (
 );
 
 const AppContent = () => {
-  const { isJoinUsModalOpen, closeJoinUsModal, selectedPlan } = useModal();
+  const { isJoinUsModalOpen, closeJoinUsModal, selectedPlan, isLoginModalOpen, closeLoginModal } = useModal();
 
   return (
     <div className="App">
@@ -48,6 +49,10 @@ const AppContent = () => {
         isOpen={isJoinUsModalOpen}
         onClose={closeJoinUsModal}
         initialPlan={selectedPlan}
+      />
+      <LoginModal
+        isOpen={isLoginModalOpen}
+        onClose={closeLoginModal}
       />
     </div>
   );

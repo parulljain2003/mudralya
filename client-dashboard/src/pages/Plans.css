@@ -1,0 +1,321 @@
+/* Plans.css */
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap");
+
+.plans-page {
+  /* Main page background */
+  padding: 40px 20px;
+  background-color: #f8f9fc;
+  min-height: 100vh;
+  font-family: "Outfit", sans-serif;
+  color: #333;
+}
+
+.plans-header {
+  margin-bottom: 40px;
+  padding-left: 20px;
+  max-width: 1400px;
+  margin: 0 auto 40px;
+}
+
+.plans-header h1 {
+  font-size: 2.5rem;
+  color: #000;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.plans-header .subtitle {
+  font-size: 1rem;
+  color: #777;
+  margin: 0;
+  font-weight: 300;
+}
+
+/* Grid Layout */
+.plans-grid {
+  display: flex;
+  justify-content: center;
+  gap: 20px; /* Reduced gap */
+  flex-wrap: wrap; /* Allow wrapping but try to fit */
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: stretch; /* Ensure all cards are same height */
+}
+
+/* Base Card Styles */
+.plan-card {
+  border-radius: 28px;
+  padding: 24px 20px;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  color: #fff;
+  width: 290px;
+  /* Removed fixed min-height to allow stretch to work naturally, 
+       but setting a small min-height ensures they don't collapse when empty */
+  min-height: 500px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease;
+}
+
+.plan-card:hover {
+  transform: translateY(-5px);
+}
+
+/* Card 1, 3, 4: Purple Gradient */
+.card-purple-gradient {
+  /* Matching screenshot: Top light, bottom deep */
+  background: linear-gradient(180deg, #8c9eff 0%, #651fff 40%, #4a148c 100%);
+  /* Better match: brighter top */
+  background: linear-gradient(180deg, #7f7fd5 0%, #86a8e7 50%, #5b42f2 100%);
+  /* Let's stick to a solid vibrant flow */
+  background: linear-gradient(180deg, #818cf8 0%, #6366f1 35%, #4338ca 100%);
+}
+
+/* Card 2: Deep Black */
+.card-black {
+  background: #111111;
+  border: 1px solid #222;
+  /* Often distinct card is slightly larger? Let's keep same height for cleanliness */
+  z-index: 10;
+}
+
+/* Standard Pill Badge */
+.plan-badge-pill {
+  background: #fff;
+  color: #222;
+  padding: 6px 24px;
+  border-radius: 50px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 5px;
+  margin-bottom: 15px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.5px;
+}
+
+/* Individual Wide Gradient Badge */
+.plan-badge-wide-gradient {
+  /* Pearl/Holographic gradient */
+  background: linear-gradient(90deg, #d4fc79 0%, #96e6a1 100%);
+  /* Actually image shows cooler tones */
+  background: linear-gradient(90deg, #a1c4fd 0%, #c2e9fb 100%);
+  /* Let's try the purplish one from before but lighter */
+  background: linear-gradient(90deg, #e0c3fc 0%, #8ec5fc 100%);
+
+  color: #111;
+  width: 90%;
+  padding: 10px 0;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  margin-top: 5px;
+  margin-bottom: 20px;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Prices */
+.plan-price {
+  font-size: 3.5rem;
+  font-weight: 600;
+  margin: 5px 0 25px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+}
+
+.plan-price:not(.price-custom)::before {
+  content: "₹";
+  font-size: 2.2rem;
+  font-weight: 400;
+  margin-top: -8px;
+}
+
+.large-price {
+  font-size: 2.8rem;
+  font-weight: 700;
+}
+
+.price-custom {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+.price-custom::before {
+  content: "₹";
+  font-size: 2rem;
+  font-weight: 400;
+  margin-right: 5px;
+}
+
+/* Features List */
+.plan-features {
+  list-style: none;
+  padding: 0 8px;
+  margin: 0 0 20px;
+  text-align: left;
+  width: 100%;
+  flex-grow: 1;
+}
+
+.plan-features li {
+  font-size: 0.8rem;
+  line-height: 1.4;
+  margin-bottom: 10px;
+  color: #e0e0e0;
+  position: relative;
+  padding-left: 14px;
+  font-weight: 300;
+}
+
+.plan-features li::before {
+  content: "•";
+  position: absolute;
+  left: 0;
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1rem;
+  top: 1px;
+}
+
+/* Laptop Checkbox */
+.laptop-check {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  font-size: 0.85rem;
+  cursor: pointer;
+  width: 100%;
+  padding: 12px 10px;
+  border-top: 1px solid #333;
+  border-bottom: 1px solid #333;
+  color: #fff;
+  font-weight: 400;
+}
+
+.laptop-check input {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #fff;
+  border-radius: 3px;
+  background: transparent;
+  cursor: pointer;
+  position: relative;
+  flex-shrink: 0; /* Don't squash check */
+}
+
+.laptop-check input:checked {
+  background: #fff;
+}
+
+.laptop-check input:checked::after {
+  content: "✓";
+  position: absolute;
+  color: #000;
+  font-size: 12px;
+  left: 1px;
+  top: -1px;
+  font-weight: bold;
+}
+
+/* Buttons */
+.plan-btn {
+  width: 100%;
+  padding: 14px 0;
+  border-radius: 30px;
+  font-weight: 700;
+  font-size: 0.8rem;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: none;
+  transition: all 0.2s ease;
+  margin-bottom: 5px;
+  margin-top: auto; /* Push button to the bottom */
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+
+.btn-outline:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #fff;
+}
+
+.btn-cyan {
+  background: #73e6dc;
+  color: #000;
+  box-shadow: 0 4px 15px rgba(115, 230, 220, 0.2);
+}
+
+.btn-cyan:hover {
+  background: #5cdccd;
+}
+
+.btn-black {
+  background: #000;
+  color: #fff;
+}
+
+/* Screenshot specificity: Black button inside purple card */
+.card-purple-gradient .btn-black {
+  background: #000;
+  color: #fff;
+  width: 90%;
+  margin: 0 auto 5px;
+}
+
+/* Responsive */
+@media (max-width: 1280px) {
+  .plans-grid {
+    justify-content: center;
+    gap: 15px;
+  }
+
+  .plan-card {
+    width: 260px; /* Compress slightly to fit */
+    padding: 20px 15px;
+  }
+
+  .plan-badge-wide-gradient {
+    font-size: 0.9rem;
+  }
+}
+
+@media (max-width: 1100px) {
+  /* 2x2 Layout */
+  .plans-grid {
+    max-width: 800px;
+  }
+
+  .plan-card {
+    width: 300px; /* Return to comfortable width */
+  }
+}
+
+@media (max-width: 650px) {
+  .plans-grid {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .plan-card {
+    width: 100%;
+    max-width: 360px;
+  }
+}
