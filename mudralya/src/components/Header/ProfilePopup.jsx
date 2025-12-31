@@ -34,7 +34,7 @@ const ProfilePopup = ({ isOpen, onClose, userRef }) => {
             <hr className="profile-popup-divider" />
 
             <div className="profile-popup-body">
-                <a href="http://localhost:5174" className="profile-popup-section-title profile-popup-dashboard-link">Dashboard</a>
+                <Link to="/member-dashboard" className="profile-popup-section-title profile-popup-dashboard-link">Dashboard</Link>
 
                 <Link to="/dashboard/settings" className="profile-popup-menu-item">
                     Account Settings

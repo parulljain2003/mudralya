@@ -92,8 +92,14 @@ app.use("/api/join", joinRouter);
 app.use("/api/advisor", advisorRouter);
 app.use("/api/newsletter", newsletterRouter);
 app.use("/api/admin", adminRouter);
+const clientDashboardRouter = require("./routes/clientDashboard");
+const adminTasksRouter = require("./routes/adminTasks"); // New Route
+
 app.use("/api/payment", paymentRouter);
 app.use("/api/auth", authRouter);
+app.use("/api/admin/tasks", adminSession, adminTasksRouter); // Protected by admin session
+
+app.use("/api/client-dashboard", clientDashboardRouter); // Protected by middleware inside the router
 app.use("/api/dashboard", adminSession, dashboardRouter);
 
 // Serve index.html for any unknown routes (SPA support) - MUST be after API routes

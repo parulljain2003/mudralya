@@ -238,9 +238,8 @@ const ContactUs = () => {
                   src="/images/customer-support.png"
                   alt="Customer Support"
                   className="support-img"
-                  onError={(e) => {
-                    e.target.src = 'https://via.placeholder.com/150x150?text=Support';
-                  }}
+
+
                 />
               </div>
 
@@ -327,7 +326,7 @@ const ContactUs = () => {
                     value={formData.email}
                     onChange={handleChange}
                     onBlur={handleBlur}
-                    placeholder="your.email@example.com"
+                    placeholder="yourname@email.com"
                     maxLength={100}
                     required
                   />
