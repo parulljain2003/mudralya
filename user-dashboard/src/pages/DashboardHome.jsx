@@ -7,7 +7,7 @@ import './DashboardHome.css';
 
 const DashboardHome = () => {
     const { profile, user } = useUser();
-    const [data, setData] = useState({ tasks: [], stats: { approved: 0, pending: 0, total: 60000 }, transactions: [] });
+    const [data, setData] = useState({ tasks: [], ongoingTask: null, stats: { approved: 0, pending: 0, total: 60000 }, transactions: [] });
     const [loading, setLoading] = useState(true);
 
     const fullName = profile?.full_name || 'User';
@@ -18,7 +18,7 @@ const DashboardHome = () => {
 
             try {
                 // Parallel fetching for performance
-                const [tasksRes, transactionsRes, statsRes] = await Promise.all([
+                const [tasksRes, transactionsRes, statsRes, userTasksRes] = await Promise.all([
                     supabase.from('tasks').select('*').limit(5),
                     supabase
                         .from('transactions')
@@ -26,16 +26,25 @@ const DashboardHome = () => {
                         .eq('user_id', user.id)
                         .order('created_at', { ascending: false })
                         .limit(5),
-                    supabase.rpc('get_user_wallet_stats', { user_id_param: user.id })
+                    supabase.rpc('get_user_wallet_stats', { user_id_param: user.id }),
+                    supabase
+                        .from('user_tasks')
+                        .select('*, tasks(*)')
+                        .eq('user_id', user.id)
+                        .eq('status', 'ongoing')
+                        .order('created_at', { ascending: false })
+                        .limit(1)
                 ]);
 
                 const tasks = tasksRes.data || [];
                 const transactions = transactionsRes.data || [];
                 // Handle RPC returning null or error gracefully
                 const stats = statsRes.data || { approved: 0, pending: 0, total: 0, payout: 0, today: 0, monthly: 0 };
+                const ongoingTask = userTasksRes.data && userTasksRes.data.length > 0 ? userTasksRes.data[0].tasks : null;
 
                 setData({
                     tasks,
+                    ongoingTask,
                     transactions,
                     stats
                 });
@@ -43,6 +52,7 @@ const DashboardHome = () => {
                 if (tasksRes.error) console.error("Tasks fetch error:", tasksRes.error);
                 if (transactionsRes.error) console.error("Transactions fetch error:", transactionsRes.error);
                 if (statsRes.error) console.error("Stats RPC error:", statsRes.error);
+                if (userTasksRes.error) console.error("User tasks fetch error:", userTasksRes.error);
 
             } catch (err) {
                 console.error("Error fetching dashboard data:", err);
@@ -127,44 +137,44 @@ const DashboardHome = () => {
                             <h3>Ongoing Task</h3>
                             <span>:</span>
                         </div>
-                        {data.tasks && data.tasks[0] ? (
+                        {data.ongoingTask ? (
                             <div className="ongoing-task-card">
                                 <div className="task-info-row">
                                     <div className="task-icon-circle blue-gradient">
-                                        {getIcon(data.tasks[0].icon_type)}
+                                        {getIcon(data.ongoingTask.icon_type)}
                                     </div>
                                     <div className="task-details">
-                                        <h4>{data.tasks[0].title}</h4>
-                                        <p>{data.tasks[0].category}</p>
+                                        <h4>{data.ongoingTask.title}</h4>
+                                        <p>{data.ongoingTask.category}</p>
                                     </div>
                                     <span className="expand-icon">^</span>
                                 </div>
                                 <div className="task-rewards-row">
                                     <span>Task Reward</span>
                                     <div className="rewards">
-                                        {(data.tasks[0].reward_member && data.tasks[0].reward_member > 0) ? (
+                                        {(data.ongoingTask.reward_member && data.ongoingTask.reward_member > 0) ? (
                                             <>
                                                 <div className="reward-item member">
                                                     <span className="badge-label member">Members</span>
-                                                    <span className="amount">₹ {data.tasks[0].reward_member}</span>
+                                                    <span className="amount">₹ {data.ongoingTask.reward_member}</span>
                                                 </div>
                                                 <div className="reward-item free">
                                                     <span className="badge-label free">Free</span>
-                                                    <span className="amount">₹ {data.tasks[0].reward_free}</span>
+                                                    <span className="amount">₹ {data.ongoingTask.reward_free}</span>
                                                 </div>
                                             </>
                                         ) : (
                                             <div className="reward-item single">
-                                                <span className="amount text-primary fs-4">₹ {data.tasks[0].reward_free}</span>
-                                                {data.tasks[0].reward_info && (
-                                                    <small className="text-muted d-block mt-1">{data.tasks[0].reward_info}</small>
+                                                <span className="amount text-primary fs-4">₹ {data.ongoingTask.reward_free}</span>
+                                                {data.ongoingTask.reward_info && (
+                                                    <small className="text-muted d-block mt-1">{data.ongoingTask.reward_info}</small>
                                                 )}
                                             </div>
                                         )}
                                     </div>
                                 </div>
                                 <div className="task-actions-row">
-                                    <button className="btn-view-details">Start Task</button>
+                                    <button className="btn-view-details">Resume Task</button>
                                     <button className="btn-copy-code">
                                         <span>Claim Reward</span>
                                         <FaHandHoldingUsd className="ms-1" />
