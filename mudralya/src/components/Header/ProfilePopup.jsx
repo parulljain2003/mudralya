@@ -34,7 +34,12 @@ const ProfilePopup = ({ isOpen, onClose, userRef }) => {
             <hr className="profile-popup-divider" />
 
             <div className="profile-popup-body">
-                <a href="https://user.mudralaya.com" className="profile-popup-section-title profile-popup-dashboard-link">
+                <a
+                    href="https://user.mudralaya.com"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="profile-popup-section-title profile-popup-dashboard-link"
+                >
                     Dashboard
                 </a>
 
