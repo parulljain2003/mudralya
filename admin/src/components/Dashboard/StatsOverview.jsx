@@ -51,7 +51,7 @@ const StatsOverview = ({ data }) => {
                                         <span>{stat.change} this week</span>
                                     </div>
                                 </div>
-                                <div className={`stat-icon-bg bg-${stat.color}`}>
+                                <div className={`stat-icon-bg bg-gradient-${stat.color}`}>
                                     <i className={stat.icon}></i>
                                 </div>
                             </div>

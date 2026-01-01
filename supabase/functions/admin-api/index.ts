@@ -21,11 +21,11 @@ serve(async (req: Request): Promise<Response> => {
 
     // Simple Admin Auth check
     const authHeader = req.headers.get('x-admin-password')
-    
+
     if (action === 'login') {
       if (data.username === adminUser && data.password === adminPass) {
-        return new Response(JSON.stringify({ 
-          message: 'Logged in', 
+        return new Response(JSON.stringify({
+          message: 'Logged in',
           success: true,
           token: adminPass // Using password as a simple token to mirror current behavior
         }), {
@@ -42,10 +42,10 @@ serve(async (req: Request): Promise<Response> => {
 
     // Verify token for all other actions
     if (authHeader !== adminPass) {
-        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-          status: 401,
-        })
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        status: 401,
+      })
     }
 
     let result;
@@ -88,23 +88,27 @@ serve(async (req: Request): Promise<Response> => {
           .from('tasks')
           .select('*')
           .order('created_at', { ascending: false })
-        
+
         if (fetchTasksError) throw fetchTasksError
         result = allTasks
         break;
 
       case 'create-task':
-        const { title, description, reward_free, reward_member, type, video_url, pdf_url, action_link, icon_type, target_audience } = data
+        const { title, description, reward_free, reward_member, reward_premium, type, video_url, video_link, pdf_url, action_link, icon_type, target_audience, steps, reward_min, reward_max, reward_info } = data
         const { data: createdTask, error: createTaskError } = await supabaseClient
           .from('tasks')
           .insert({
             title,
             description,
             reward_free: reward_free || 0,
-            reward_member: reward_member || 0,
+            reward_premium: reward_premium || reward_member || 0,
+            video_link: video_link || video_url,
+            steps: steps,
+            reward_min: reward_min,
+            reward_max: reward_max,
+            reward_info: reward_info,
             category: type,
             icon_type: icon_type || 'group',
-            video_url,
             pdf_url,
             action_link,
             target_audience: target_audience && target_audience.length > 0 ? target_audience : ['All'],
@@ -112,20 +116,32 @@ serve(async (req: Request): Promise<Response> => {
           })
           .select()
           .single()
-        
+
         if (createTaskError) throw createTaskError
         result = createdTask
         break;
 
+      case 'get-task-participants':
+        const { taskId: pTaskId } = data
+        const { data: participants, error: partError } = await supabaseClient
+          .from('user_tasks')
+          .select('*, users(email_id, mobile_number, user_name, full_name)')
+          .eq('task_id', pTaskId)
+          .order('created_at', { ascending: false })
+
+        if (partError) throw partError
+        result = participants
+        break;
+
       case 'assign-task':
         const { taskId, userIdentifier } = data
-        
+
         // Find user by email or mobile
         const { data: users, error: userError } = await supabaseClient
           .from('users')
           .select('id')
           .or(`email_id.eq.${userIdentifier},mobile_number.eq.${userIdentifier}`)
-        
+
         if (userError) throw userError
         if (!users || users.length === 0) throw new Error('User not found')
 
@@ -141,7 +157,7 @@ serve(async (req: Request): Promise<Response> => {
           })
           .select()
           .single()
-        
+
         if (assignError) throw assignError
         result = assignedTask
         break;
@@ -159,7 +175,7 @@ serve(async (req: Request): Promise<Response> => {
           .from(table)
           .delete()
           .eq('id', delId)
-        
+
         if (delError) throw delError
         result = { message: 'Deleted successfully' }
         break;

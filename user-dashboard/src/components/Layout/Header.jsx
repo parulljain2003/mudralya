@@ -1,5 +1,5 @@
 import React from 'react';
-import { MdMenu, MdNotifications, MdAccountBalanceWallet, MdSearch } from 'react-icons/md';
+import { MdMenu, MdNotifications, MdSettings, MdHelp, MdSearch } from 'react-icons/md';
 import { Link } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import './Header.css';
@@ -31,8 +31,11 @@ const Header = ({ toggleSidebar }) => {
                     <MdNotifications />
                     <span className="badge"></span>
                 </button>
-                <button className="icon-btn wallet-btn">
-                    <MdAccountBalanceWallet />
+                <button className="icon-btn settings-btn" title="Settings">
+                    <MdSettings />
+                </button>
+                <button className="icon-btn help-btn" title="Help">
+                    <MdHelp />
                 </button>
 
                 <Link to="/profile" className="user-profile-link">

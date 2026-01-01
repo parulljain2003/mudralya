@@ -2,24 +2,49 @@
     --sidebar-width: 260px;
     --header-height: 70px;
     --primary-color: #00a0dc;
+    --primary-gradient: linear-gradient(135deg, #00a0dc 0%, #0077a3 100%);
+    --secondary-gradient: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    --success-gradient: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    --info-gradient: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    --warning-gradient: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    --danger-gradient: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+
     --sidebar-bg: #1e293b;
     --sidebar-text: #94a3b8;
     --sidebar-active: #ffffff;
-    --sidebar-active-bg: #00a0dc;
-    --bg-color: #f1f5f9;
+    --sidebar-active-bg: rgba(255, 255, 255, 0.1);
+    --bg-color: #f8fafc;
+    --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
+    --hover-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.025);
 }
 
 /* Stat Cards Modern */
 .stat-card-modern {
     background: white;
-    border-radius: 12px;
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-    transition: transform 0.2s;
+    border-radius: 16px;
+    box-shadow: var(--card-shadow);
+    transition: all 0.3s ease;
     height: 100%;
+    border: 1px solid rgba(0, 0, 0, 0.02);
+    overflow: hidden;
+    position: relative;
+}
+
+.stat-card-modern::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 100px;
+    height: 100px;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0) 100%);
+    border-radius: 0 0 0 100%;
+    pointer-events: none;
 }
 
 .stat-card-modern:hover {
     transform: translateY(-5px);
+    box-shadow: var(--hover-shadow);
 }
 
 .stat-card-body {
@@ -35,25 +60,27 @@
 
 .stat-title {
     color: #64748b;
-    font-size: 0.875rem;
-    font-weight: 500;
-    margin-bottom: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-bottom: 5px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
 }
 
 .stat-value {
     color: #0f172a;
-    font-size: 1.75rem;
+    font-size: 1.85rem;
     font-weight: 700;
-    margin-bottom: 8px;
+    margin-bottom: 5px;
+    letter-spacing: -0.5px;
 }
 
 .stat-change {
-    font-size: 0.875rem;
+    font-size: 0.85rem;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 6px;
+    font-weight: 500;
 }
 
 .stat-change.positive {
@@ -65,14 +92,36 @@
 }
 
 .stat-icon-bg {
-    width: 48px;
-    height: 48px;
-    border-radius: 12px;
+    width: 50px;
+    height: 50px;
+    border-radius: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.25rem;
+    font-size: 1.35rem;
     color: white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Gradient Utility Classes for Icons */
+.bg-gradient-primary {
+    background: var(--primary-gradient);
+}
+
+.bg-gradient-success {
+    background: var(--success-gradient);
+}
+
+.bg-gradient-info {
+    background: var(--info-gradient);
+}
+
+.bg-gradient-warning {
+    background: var(--warning-gradient);
+}
+
+.bg-gradient-danger {
+    background: var(--danger-gradient);
 }
 
 
@@ -146,17 +195,27 @@
     margin-bottom: 5px;
     transition: all 0.2s;
     text-align: left;
+    position: relative;
+    overflow: hidden;
 }
 
 .nav-link:hover {
-    background: rgba(255, 255, 255, 0.05);
+    background: rgba(255, 255, 255, 0.08);
+    /* Slightly lighter on hover */
     color: white;
 }
 
 .nav-link.active {
-    background: var(--primary-color);
+    background: var(--primary-gradient);
+    /* Use gradient */
     color: white;
-    box-shadow: 0 4px 12px rgba(0, 160, 220, 0.3);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    /* Softer shadow */
+}
+
+.nav-indicator {
+    display: none;
+    /* Hidden by default, can use for left-border effect if preferred */
 }
 
 .nav-icon {

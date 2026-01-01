@@ -20,7 +20,7 @@ serve(async (req: Request): Promise<Response> => {
 
     if (action === 'create-order') {
       const { amount, currency, receipt } = data
-      
+
       const response = await fetch('https://api.razorpay.com/v1/orders', {
         method: 'POST',
         headers: {
@@ -49,8 +49,8 @@ serve(async (req: Request): Promise<Response> => {
     }
 
     if (action === 'verify-payment') {
-      const { submissionId, razorpay_payment_id, razorpay_order_id, razorpay_signature } = data
-      
+      const { submissionId, razorpay_payment_id, razorpay_order_id, razorpay_signature, type, userId, plan } = data
+
       // Verify signature
       const text = `${razorpay_order_id}|${razorpay_payment_id}`
       const encoder = new TextEncoder()
@@ -73,24 +73,56 @@ serve(async (req: Request): Promise<Response> => {
         throw new Error('Invalid payment signature')
       }
 
-      // Update database
-      const { error: updateError } = await supabaseClient
-        .from('join_requests')
-        .update({
-          payment_status: 'Paid',
-          razorpay_payment_id: razorpay_payment_id,
-          razorpay_order_id: razorpay_order_id,
-          razorpay_signature: razorpay_signature,
-          updated_at: new Date()
+      // Handle Membership Payment
+      if (type === 'membership' && userId && plan) {
+        const now = new Date();
+        let expiryDate = new Date();
+
+        if (plan === 'yearly') {
+          expiryDate.setFullYear(expiryDate.getFullYear() + 1);
+        } else if (plan === 'monthly') {
+          expiryDate.setDate(expiryDate.getDate() + 30);
+        }
+
+        const { error: updateError } = await supabaseClient
+          .from('users')
+          .update({
+            membership_type: plan,
+            membership_expiry: expiryDate.toISOString(),
+            updated_at: now.toISOString()
+          })
+          .eq('id', userId);
+
+        if (updateError) throw updateError;
+
+        return new Response(JSON.stringify({ success: true, expiry: expiryDate }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+      }
+
+      // Default: Handle Join Request Payment (Backward Compatibility)
+      if (submissionId) {
+        const { error: updateError } = await supabaseClient
+          .from('join_requests')
+          .update({
+            payment_status: 'Paid',
+            razorpay_payment_id: razorpay_payment_id,
+            razorpay_order_id: razorpay_order_id,
+            razorpay_signature: razorpay_signature,
+            updated_at: new Date()
+          })
+          .eq('id', submissionId)
+
+        if (updateError) throw updateError
+
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
         })
-        .eq('id', submissionId)
+      }
 
-      if (updateError) throw updateError
-
-      return new Response(JSON.stringify({ success: true }), {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      })
+      throw new Error('Missing submissionId or invalid payment type')
     }
 
     throw new Error('Invalid action')

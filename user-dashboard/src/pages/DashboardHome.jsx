@@ -142,21 +142,32 @@ const DashboardHome = () => {
                                 <div className="task-rewards-row">
                                     <span>Task Reward</span>
                                     <div className="rewards">
-                                        <div className="reward-item member">
-                                            <span className="badge-label member">Members</span>
-                                            <span className="amount">₹ {data.tasks[0].reward_member}</span>
-                                        </div>
-                                        <div className="reward-item free">
-                                            <span className="badge-label free">Free</span>
-                                            <span className="amount">₹ {data.tasks[0].reward_free}</span>
-                                        </div>
+                                        {(data.tasks[0].reward_member && data.tasks[0].reward_member > 0) ? (
+                                            <>
+                                                <div className="reward-item member">
+                                                    <span className="badge-label member">Members</span>
+                                                    <span className="amount">₹ {data.tasks[0].reward_member}</span>
+                                                </div>
+                                                <div className="reward-item free">
+                                                    <span className="badge-label free">Free</span>
+                                                    <span className="amount">₹ {data.tasks[0].reward_free}</span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="reward-item single">
+                                                <span className="amount text-primary fs-4">₹ {data.tasks[0].reward_free}</span>
+                                                {data.tasks[0].reward_info && (
+                                                    <small className="text-muted d-block mt-1">{data.tasks[0].reward_info}</small>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                                 <div className="task-actions-row">
-                                    <button className="btn-view-details">View Details</button>
+                                    <button className="btn-view-details">Start Task</button>
                                     <button className="btn-copy-code">
-                                        <span>MF250E</span>
-                                        <MdContentCopy />
+                                        <span>Claim Reward</span>
+                                        <FaHandHoldingUsd className="ms-1" />
                                     </button>
                                 </div>
                             </div>

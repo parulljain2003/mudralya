@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUsers, FaCopy, FaSearch, FaFilter, FaSort, FaGem, FaBuilding, FaRocket, FaEdit, FaYoutube, FaFilePdf, FaChevronRight } from 'react-icons/fa';
+import { FaUsers, FaCopy, FaSearch, FaFilter, FaSort, FaGem, FaBuilding, FaRocket, FaEdit, FaYoutube, FaFilePdf, FaChevronRight, FaPlay } from 'react-icons/fa';
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md';
 import { supabase } from '../supabaseClient';
 import './Task.css';
@@ -7,6 +7,8 @@ import './Task.css';
 const Task = () => {
     const [tasks, setTasks] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    // Filter & Sort States
     const [selectedProfessions, setSelectedProfessions] = useState({
         'All': true,
         'Student': false,
@@ -24,6 +26,8 @@ const Task = () => {
     });
 
     const [sortOption, setSortOption] = useState('newest');
+    const [activeTab, setActiveTab] = useState('All Task');
+    const [expandedTaskId, setExpandedTaskId] = useState(null);
 
     useEffect(() => {
         const fetchTasks = async () => {
@@ -63,6 +67,20 @@ const Task = () => {
         }
     };
 
+    const handleSmartAction = (task) => {
+        // Unified action handler
+        // If task has steps or video, maybe show them first? 
+        // For now, simpler logic:
+        handleTakeTask(task);
+    };
+
+    const getSmartButtonLabel = (task) => {
+        // Mock status logic - in real app, check task.status
+        if (task.status === 'in_progress') return 'Resume Task';
+        if (task.status === 'completed') return 'Claim Reward';
+        return 'Start Task';
+    };
+
     const handleProfessionChange = (prof) => {
         if (prof === 'All') {
             setSelectedProfessions({
@@ -73,13 +91,7 @@ const Task = () => {
                 'Part Time': false
             });
         } else {
-            setSelectedProfessions(prev => {
-                const newState = { ...prev, [prof]: !prev[prof], 'All': false };
-                // If no specific filters selected, revert to All? Optional.
-                // For now, if all detailed unchecked, we don't auto-check All to avoid confusion, 
-                // but usually user expects at least one thing. 
-                return newState;
-            });
+            setSelectedProfessions(prev => ({ ...prev, [prof]: !prev[prof], 'All': false }));
         }
     };
 
@@ -111,16 +123,18 @@ const Task = () => {
 
     // Filtering Logic
     const filteredTasks = tasks.filter(task => {
-        // Filter by Profession (Target Audience)
+        // 1. Tab Filter
+        if (activeTab === 'Completed' && task.status !== 'completed') return false;
+        if (activeTab === 'Ongoing' && task.status !== 'in_progress') return false;
+
+        // 2. Profession Filter
         const activeProfessions = Object.keys(selectedProfessions).filter(k => k !== 'All' && selectedProfessions[k]);
         const professionMatch = selectedProfessions['All'] ||
             (task.target_audience && task.target_audience.some(aud => activeProfessions.includes(aud))) ||
-            (!task.target_audience); // Show if no audience defined? Or hide? Let's show for now to be safe.
+            (!task.target_audience);
 
-        // Filter by Type
+        // 3. Type Filter
         const activeTypes = Object.keys(selectedTypes).filter(k => k !== 'All' && selectedTypes[k]);
-        // Map UI types to DB types if needed. Assuming DB 'category' matches or closely maps.
-        // DB categories: 'Daily Task', 'Weekly Task', 'One-time' etc. we might need fuzzy match.
         const typeMatch = selectedTypes['All'] ||
             activeTypes.some(t => task.category && task.category.toLowerCase().includes(t.toLowerCase()));
 
@@ -233,19 +247,22 @@ const Task = () => {
                                             <div className="reward-pricing">
                                                 <div className="price-item">
                                                     <div className="badge-members"><FaGem /> Members</div>
-                                                    <div className="price-value text-blue">₹ {task.reward_member || task.reward || 800}</div>
+                                                    <div className="price-value text-blue">₹ {task.reward_member || task.reward_premium || task.reward || 800}</div>
                                                 </div>
                                                 <div className="price-item">
                                                     <div className="label-free">Free</div>
                                                     <div className="price-value text-green">₹ {task.reward_free || task.reward || 600}</div>
                                                 </div>
                                             </div>
+                                            {task.reward_info && (
+                                                <p className="text-muted small mt-2"><FaGem className="me-1" />{task.reward_info}</p>
+                                            )}
                                         </div>
 
-                                        {(task.video_url || task.pdf_url) && (
-                                            <>
-                                                {task.video_url && (
-                                                    <div className="resource-link" onClick={() => window.open(task.video_url, '_blank')}>
+                                        {(task.video_url || task.video_link || task.pdf_url) && (
+                                            <div className="mt-3">
+                                                {(task.video_url || task.video_link) && (
+                                                    <div className="resource-link" onClick={() => window.open(task.video_url || task.video_link, '_blank')}>
                                                         <div style={{ width: 24 }}></div>
                                                         <span>Task Guidance Video</span>
                                                         <div className="ms-auto"><FaYoutube style={{ color: 'red', fontSize: '24px' }} /></div>
@@ -258,12 +275,17 @@ const Task = () => {
                                                         <div className="ms-auto"><FaFilePdf style={{ color: '#e53935', fontSize: '24px' }} /></div>
                                                     </div>
                                                 )}
-                                            </>
+                                            </div>
                                         )}
 
-                                        <button className="btn-take-task" onClick={() => handleTakeTask(task)}>
-                                            Take Task
-                                        </button>
+                                        <div className="mt-3">
+                                            <button
+                                                className="btn-take-task w-100"
+                                                onClick={() => handleSmartAction(task)}
+                                            >
+                                                {getSmartButtonLabel(task)}
+                                            </button>
+                                        </div>
                                     </div>
                                 )}
                             </div>
@@ -276,4 +298,3 @@ const Task = () => {
 };
 
 export default Task;
-

@@ -35,6 +35,7 @@ const Sidebar = ({ activeTab, setActiveTab, onLogout, isMobileOpen, toggleMobile
                                         if (window.innerWidth < 992) toggleMobileSidebar();
                                     }}
                                 >
+                                    <span className="nav-indicator"></span>
                                     <i className={`${item.icon} nav-icon`}></i>
                                     <span>{item.label}</span>
                                 </button>
