@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './ContactUs.css';
-import { request } from '../../api/client';
+
 import { supabase } from '../../supabaseClient';
 
 const ContactUs = () => {

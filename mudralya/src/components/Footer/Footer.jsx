@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import './Footer.css';
-import { request } from '../../api/client';
+
 import { supabase } from '../../supabaseClient';
 
 const Footer = () => {

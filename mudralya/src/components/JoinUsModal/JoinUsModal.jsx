@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './JoinUsModal.css';
 import { useModal } from '../../context/ModalContext';
-import { request } from '../../api/client';
+
 import { supabase } from '../../supabaseClient';
 import JoinUsSuccess from './JoinUsSuccess';
 import SuccessPopup from '../SuccessPopup/SuccessPopup';

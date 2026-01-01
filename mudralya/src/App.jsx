@@ -13,8 +13,7 @@ const AboutUs = lazy(() => import('./components/AboutUs/AboutUs.jsx'));
 const ContactUs = lazy(() => import('./components/ContactUs/ContactUs.jsx'));
 const Advisor = lazy(() => import('./components/Advisor/Advisor.jsx'));
 const Plans = lazy(() => import('./components/Home/Home.jsx'));
-const Dashboard = lazy(() => import('./components/Dashboard/Dashboard.jsx'));
-const MemberDashboard = lazy(() => import('./components/MemberDashboard/MemberDashboard.jsx'));
+
 
 // Loading component
 const Loading = () => (
@@ -39,8 +38,7 @@ const AppContent = () => {
             <Route path="/about" element={<AboutUs />} />
             <Route path="/contact" element={<ContactUs />} />
             <Route path="/advisor" element={<Advisor />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/member-dashboard" element={<MemberDashboard />} />
+
           </Routes>
         </Suspense>
       </main>
