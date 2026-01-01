@@ -94,16 +94,20 @@ serve(async (req: Request): Promise<Response> => {
         break;
 
       case 'create-task':
-        const { title, description, reward, type } = data
+        const { title, description, reward_free, reward_member, type, video_url, pdf_url, action_link, icon_type } = data
         const { data: createdTask, error: createTaskError } = await supabaseClient
           .from('tasks')
           .insert({
             title,
             description,
-            reward_free: reward,
-            reward_member: reward, // Setting both to same for now unless specified
+            reward_free: reward_free || 0,
+            reward_member: reward_member || 0,
             category: type,
-            icon_type: 'group' // Default icon
+            icon_type: icon_type || 'group',
+            video_url,
+            pdf_url,
+            action_link,
+            is_active: true
           })
           .select()
           .single()

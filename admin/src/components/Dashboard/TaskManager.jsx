@@ -11,9 +11,14 @@ const TaskManager = () => {
         title: '',
         description: '',
         reward: '',
+        reward_member: '',
         type: 'Daily Task',
         link: '',
-        action_required: 'signup'
+        action_required: 'signup',
+        video_url: '',
+        pdf_url: '',
+        action_link: '',
+        icon_type: 'group'
     });
 
     // Assign Task State
@@ -57,7 +62,11 @@ const TaskManager = () => {
 
             alert('Task Created Successfully');
             setShowCreateForm(false);
-            setNewTask({ title: '', description: '', reward: '', type: 'Daily Task', link: '', action_required: 'signup' });
+            setNewTask({
+                title: '', description: '', reward: '', reward_member: '',
+                type: 'Daily Task', link: '', action_required: 'signup',
+                video_url: '', pdf_url: '', action_link: '', icon_type: 'group'
+            });
             fetchTasks();
         } catch (err) {
             alert('Failed to create task: ' + err.message);
@@ -110,7 +119,7 @@ const TaskManager = () => {
                                     />
                                 </div>
                                 <div className="col-md-3">
-                                    <label className="form-label small">Reward (₹)</label>
+                                    <label className="form-label small">Free Reward (₹)</label>
                                     <input
                                         type="number" className="form-control" required
                                         value={newTask.reward}
@@ -118,6 +127,15 @@ const TaskManager = () => {
                                     />
                                 </div>
                                 <div className="col-md-3">
+                                    <label className="form-label small">Member Reward (₹)</label>
+                                    <input
+                                        type="number" className="form-control"
+                                        value={newTask.reward_member}
+                                        onChange={e => setNewTask({ ...newTask, reward_member: e.target.value })}
+                                        placeholder="Optional"
+                                    />
+                                </div>
+                                <div className="col-md-4">
                                     <label className="form-label small">Type</label>
                                     <select
                                         className="form-select"
@@ -128,6 +146,46 @@ const TaskManager = () => {
                                         <option>Weekly Task</option>
                                         <option>One-time</option>
                                     </select>
+                                </div>
+                                <div className="col-md-4">
+                                    <label className="form-label small">Icon Type</label>
+                                    <select
+                                        className="form-select"
+                                        value={newTask.icon_type}
+                                        onChange={e => setNewTask({ ...newTask, icon_type: e.target.value })}
+                                    >
+                                        <option value="group">Group (Users)</option>
+                                        <option value="rocket">Rocket</option>
+                                        <option value="feedback">Feedback/Form</option>
+                                        <option value="building">Bank/Building</option>
+                                    </select>
+                                </div>
+                                <div className="col-md-4">
+                                    <label className="form-label small">Action Link</label>
+                                    <input
+                                        type="text" className="form-control"
+                                        value={newTask.action_link}
+                                        onChange={e => setNewTask({ ...newTask, action_link: e.target.value })}
+                                        placeholder="https://..."
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label small">Video URL</label>
+                                    <input
+                                        type="text" className="form-control"
+                                        value={newTask.video_url}
+                                        onChange={e => setNewTask({ ...newTask, video_url: e.target.value })}
+                                        placeholder="Link to video"
+                                    />
+                                </div>
+                                <div className="col-md-6">
+                                    <label className="form-label small">PDF URL</label>
+                                    <input
+                                        type="text" className="form-control"
+                                        value={newTask.pdf_url}
+                                        onChange={e => setNewTask({ ...newTask, pdf_url: e.target.value })}
+                                        placeholder="Link to PDF"
+                                    />
                                 </div>
                                 <div className="col-12">
                                     <label className="form-label small">Description</label>

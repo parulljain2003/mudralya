@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUsers, FaCopy, FaSearch, FaFilter, FaSort, FaGem, FaBuilding, FaRocket, FaEdit } from 'react-icons/fa';
+import { FaUsers, FaCopy, FaSearch, FaFilter, FaSort, FaGem, FaBuilding, FaRocket, FaEdit, FaYoutube, FaFilePdf, FaChevronRight } from 'react-icons/fa';
 import { MdKeyboardArrowDown, MdKeyboardArrowUp } from 'react-icons/md';
 import { supabase } from '../supabaseClient';
 import './Task.css';
@@ -32,6 +32,22 @@ const Task = () => {
         setExpandedTaskId(expandedTaskId === id ? null : id);
     };
 
+    const handleTakeTask = async (task) => {
+        if (task.action_link) {
+            window.open(task.action_link, '_blank');
+        }
+
+        // Track task start in backend
+        try {
+            const { error } = await supabase.functions.invoke('dashboard-api', {
+                body: { action: 'start-task', taskId: task.id }
+            });
+            if (error) console.error('Error starting task:', error);
+        } catch (err) {
+            console.error('Failed to start task:', err);
+        }
+    };
+
     const getIcon = (type) => {
         switch (type) {
             case 'group': return <FaUsers />;
@@ -43,6 +59,12 @@ const Task = () => {
     };
 
     if (loading) return <div className="loading">Loading Tasks...</div>;
+
+    const filteredTasks = tasks.filter(task => {
+        if (activeTab === 'All Task') return true;
+        // Logic for Completed/Ongoing can be added here if status is available
+        return true;
+    });
 
     return (
         <div className="task-page">
@@ -70,9 +92,9 @@ const Task = () => {
             </div>
 
             <div className="task-list">
-                {tasks.map((task) => (
+                {filteredTasks.map((task) => (
                     <div className="task-card" key={task.id}>
-                        <div className="task-card-header">
+                        <div className="task-card-header" onClick={() => toggleExpand(task.id)}>
                             <div className="task-left">
                                 <div className={`task-icon-wrapper icon-red-gradient`}>
                                     {getIcon(task.icon_type)}
@@ -80,15 +102,15 @@ const Task = () => {
                                 <div className="task-info">
                                     <h3>{task.title}</h3>
                                     <div className="task-meta">
-                                        <span>{task.category}</span>
+                                        <span>{task.category || task.type}</span>
                                     </div>
                                 </div>
                             </div>
                             <div className="task-right">
                                 <button className={`reward-btn`}>
-                                    ₹ {task.reward_free}
+                                    ₹ {task.reward_free || task.reward}
                                 </button>
-                                <button className="toggle-btn" onClick={() => toggleExpand(task.id)}>
+                                <button className="toggle-btn">
                                     {expandedTaskId === task.id ? <MdKeyboardArrowUp /> : <MdKeyboardArrowDown />}
                                 </button>
                             </div>
@@ -97,18 +119,42 @@ const Task = () => {
                         {expandedTaskId === task.id && (
                             <div className="task-expanded">
                                 <div className="expanded-section">
-                                    <h4>Task Reward</h4>
+                                    <div className="d-flex justify-content-between align-items-center mb-2">
+                                        <h4 className="mb-0">Task Reward</h4>
+                                    </div>
                                     <div className="reward-pricing">
                                         <div className="price-item">
                                             <div className="badge-members"><FaGem /> Members</div>
-                                            <div className="price-value text-blue">₹ {task.reward_member}</div>
+                                            <div className="price-value text-blue">₹ {task.reward_member || task.reward || 800}</div>
                                         </div>
                                         <div className="price-item">
                                             <div className="label-free">Free</div>
-                                            <div className="price-value text-green">₹ {task.reward_free}</div>
+                                            <div className="price-value text-green">₹ {task.reward_free || task.reward || 600}</div>
                                         </div>
                                     </div>
                                 </div>
+
+                                {(task.video_url || task.pdf_url) && (
+                                    <>
+                                        <div className="expanded-separator"></div>
+                                        <div className="expanded-section">
+                                            {task.video_url && (
+                                                <div className="resource-link" onClick={() => window.open(task.video_url, '_blank')}>
+                                                    <div className="resource-icon youtube-icon"><FaYoutube style={{ color: 'red' }} /></div>
+                                                    <span>Task Guidance Video</span>
+                                                    <div className="ms-auto"><FaChevronRight className="text-muted" /></div>
+                                                </div>
+                                            )}
+                                            {task.pdf_url && (
+                                                <div className="resource-link mt-2" onClick={() => window.open(task.pdf_url, '_blank')}>
+                                                    <div className="resource-icon pdf-icon"><FaFilePdf style={{ color: '#e53935' }} /></div>
+                                                    <span>Task Information</span>
+                                                    <div className="ms-auto"><FaChevronRight className="text-muted" /></div>
+                                                </div>
+                                            )}
+                                        </div>
+                                    </>
+                                )}
 
                                 <div className="expanded-section">
                                     <h4>Terms and Condition</h4>
@@ -118,17 +164,9 @@ const Task = () => {
                                         <li>Payment processed after verification.</li>
                                     </ul>
                                 </div>
-                                <button className="btn-take-task" style={{
-                                    width: '100%',
-                                    padding: '12px',
-                                    marginTop: '15px',
-                                    borderRadius: '8px',
-                                    border: 'none',
-                                    background: 'var(--primary-color)',
-                                    color: 'white',
-                                    fontWeight: '600',
-                                    cursor: 'pointer'
-                                }}>Take Task</button>
+                                <button className="btn-take-task" onClick={() => handleTakeTask(task)}>
+                                    Take Task
+                                </button>
                             </div>
                         )}
                     </div>

@@ -51,6 +51,37 @@ serve(async (req: Request): Promise<Response> => {
         result = plans
         break;
 
+      case 'start-task':
+        const { taskId } = await req.json()
+        if (!taskId) throw new Error('Task ID is required')
+
+        // Check if already started
+        const { data: existing } = await supabaseClient
+          .from('user_tasks')
+          .select('*')
+          .eq('user_id', user.id)
+          .eq('task_id', taskId)
+          .single()
+
+        if (existing) {
+            result = existing
+        } else {
+            const { data: newTask, error: startError } = await supabaseClient
+                .from('user_tasks')
+                .insert({
+                    user_id: user.id,
+                    task_id: taskId,
+                    status: 'ongoing',
+                    reward_earned: 0
+                })
+                .select()
+                .single()
+            
+            if (startError) throw startError
+            result = newTask
+        }
+        break;
+
       default:
         throw new Error('Invalid action')
     }
