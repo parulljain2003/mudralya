@@ -58,8 +58,11 @@ const DashboardHome = () => {
         fetchDashboardData();
     }, [user]);
 
+    const [joiningTaskId, setJoiningTaskId] = useState(null);
+
     const handleStartTask = async (task) => {
         if (!user) return;
+        setJoiningTaskId(task.id);
         try {
             // 1. Open Link if present
             if (task.action_link) {
@@ -67,19 +70,36 @@ const DashboardHome = () => {
             }
 
             // 2. Call API to join task
-            const { error } = await supabase.functions.invoke('dashboard-api', {
+            const { data: responseData, error } = await supabase.functions.invoke('dashboard-api', {
                 body: { action: 'start-task', taskId: task.id }
             });
 
-            if (error) throw error;
+            if (error) {
+                // Try to extract useful error message from the response body if possible
+                let errorMessage = error.message;
+                try {
+                    // invoke() might wrap the response body in error.context or similar, 
+                    // but often we just get the message. 
+                    // Let's rely on the updated backend returning JSON with 'error' field.
+                    if (error && typeof error === 'object' && 'context' in error) {
+                        // Attempt to read context if it's a fetch response
+                        const json = await error.context.json();
+                        if (json.error) errorMessage = json.error;
+                    }
+                } catch (e) { /* ignore parse error */ }
+
+                throw new Error(errorMessage);
+            }
 
             // 3. Refresh Dashboard to show new ongoing task
-            fetchDashboardData();
-            alert('Task Started Successfully!');
+            await fetchDashboardData();
+            // alert('Task Started Successfully!'); // Removed to make it "easy"/seamless
 
         } catch (err) {
             console.error('Failed to start task:', err);
-            alert('Failed to join task. Please try again.');
+            alert(`Failed to join task: ${err.message}`);
+        } finally {
+            setJoiningTaskId(null);
         }
     };
 
@@ -235,12 +255,19 @@ const DashboardHome = () => {
                                         </div>
                                     </div>
                                     <div className="task-actions-right">
-                                        <button
-                                            className="btn btn-sm btn-primary"
-                                            onClick={() => handleStartTask(task)}
-                                        >
-                                            Start
-                                        </button>
+                                        {data.ongoingTask && data.ongoingTask.id === task.id ? (
+                                            <button className="btn btn-sm btn-success" disabled>
+                                                Joined
+                                            </button>
+                                        ) : (
+                                            <button
+                                                className="btn btn-sm btn-primary"
+                                                onClick={() => handleStartTask(task)}
+                                                disabled={joiningTaskId === task.id || (data.ongoingTask && data.ongoingTask.id === task.id)}
+                                            >
+                                                {joiningTaskId === task.id ? 'Joining...' : 'Start'}
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             ))}

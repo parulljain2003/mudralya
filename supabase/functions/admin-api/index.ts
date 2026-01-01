@@ -123,14 +123,43 @@ serve(async (req: Request): Promise<Response> => {
 
       case 'get-task-participants':
         const { taskId: pTaskId } = data
+        // 1. Fetch participants (user_tasks)
         const { data: participants, error: partError } = await supabaseClient
           .from('user_tasks')
-          .select('*, users(email_id, mobile_number, user_name, full_name)')
+          .select('*')
           .eq('task_id', pTaskId)
-          .order('created_at', { ascending: false })
 
         if (partError) throw partError
-        result = participants
+
+        if (!participants || participants.length === 0) {
+          result = []
+          break
+        }
+
+        // 2. Fetch User Details manually (since FK might be missing)
+        const userIds = participants.map((p: any) => p.user_id)
+        const { data: usersData, error: usersError } = await supabaseClient
+          .from('users')
+          .select('*')
+          .in('id', userIds)
+
+        if (usersError) throw usersError
+
+        // 3. Merge Data
+        const usersMap = new Map()
+        usersData?.forEach((u: any) => usersMap.set(u.id, u))
+
+        result = participants.map((p: any) => {
+          const user = usersMap.get(p.user_id) || null
+          // Polyfill mobile_number if missing but phone exists
+          if (user && !user.mobile_number && user.phone) {
+            user.mobile_number = user.phone
+          }
+          return {
+            ...p,
+            users: user
+          }
+        })
         break;
 
       case 'assign-task':

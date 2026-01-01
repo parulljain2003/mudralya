@@ -67,7 +67,13 @@ serve(async (req: Request): Promise<Response> => {
         if (existing) {
           result = existing
         } else {
-          const { data: newTask, error: startError } = await supabaseClient
+          // Use Service Role key to bypass RLS policies for insertion
+          const supabaseAdmin = createClient(
+            Deno.env.get('SUPABASE_URL') ?? '',
+            Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
+          )
+
+          const { data: newTask, error: startError } = await supabaseAdmin
             .from('user_tasks')
             .insert({
               user_id: user.id,
@@ -93,7 +99,12 @@ serve(async (req: Request): Promise<Response> => {
     })
 
   } catch (error: any) {
-    return new Response(JSON.stringify({ error: error.message }), {
+    console.error('API Error:', error)
+    return new Response(JSON.stringify({
+      error: error.message,
+      details: 'Check function logs',
+      receivedAction: req.url
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,
     })
