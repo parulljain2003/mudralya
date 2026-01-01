@@ -34,11 +34,9 @@ const ProfilePopup = ({ isOpen, onClose, userRef }) => {
             <hr className="profile-popup-divider" />
 
             <div className="profile-popup-body">
-                <Link to="/member-dashboard" className="profile-popup-section-title profile-popup-dashboard-link">Dashboard</Link>
-
-                <Link to="/dashboard/settings" className="profile-popup-menu-item">
-                    Account Settings
-                </Link>
+                <a href="https://user.mudralaya.com" className="profile-popup-section-title profile-popup-dashboard-link">
+                    Dashboard
+                </a>
 
                 <button className="profile-popup-logout-btn" onClick={() => {
                     logout();
