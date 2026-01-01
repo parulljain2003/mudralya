@@ -20,6 +20,12 @@ serve(async (req: Request): Promise<Response> => {
 
     if (action === 'create-order') {
       const { amount, currency, receipt } = data
+      console.log("Create Order Request:", { amount, currency, receipt });
+
+      if (!RAZORPAY_KEY_ID || !RAZORPAY_KEY_SECRET) {
+        console.error("Missing Razorpay Keys");
+        throw new Error("Server configuration error: Missing Razorpay Keys");
+      }
 
       const response = await fetch('https://api.razorpay.com/v1/orders', {
         method: 'POST',
@@ -35,6 +41,7 @@ serve(async (req: Request): Promise<Response> => {
       })
 
       const order = await response.json()
+      console.log("Razorpay Response:", response.status, order);
       if (!response.ok) {
         throw new Error(order.error?.description || 'Failed to create Razorpay order')
       }
@@ -88,6 +95,31 @@ serve(async (req: Request): Promise<Response> => {
           .from('users')
           .update({
             membership_type: plan,
+            membership_expiry: expiryDate.toISOString(),
+            updated_at: now.toISOString()
+          })
+          .eq('id', userId);
+
+        if (updateError) throw updateError;
+
+        return new Response(JSON.stringify({ success: true, expiry: expiryDate }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        });
+      }
+
+      // Handle Individual Plan Payment
+      if (type === 'plan' && userId && plan === 'individual') {
+        // Specific logic for Individual Plan (25k)
+        // We reuse membership_type for now to track this status
+        const now = new Date();
+        const expiryDate = new Date();
+        expiryDate.setFullYear(expiryDate.getFullYear() + 1); // Valid for 1 year
+
+        const { error: updateError } = await supabaseClient
+          .from('users')
+          .update({
+            membership_type: 'individual_plan',
             membership_expiry: expiryDate.toISOString(),
             updated_at: now.toISOString()
           })

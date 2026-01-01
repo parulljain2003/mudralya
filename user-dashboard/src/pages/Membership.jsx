@@ -119,7 +119,7 @@ const Membership = () => {
 
         } catch (err) {
             console.error("Payment Error:", err);
-            alert('Something went wrong during payment initialization.');
+            alert(`Payment initialization failed: ${err.message || JSON.stringify(err)}`);
         }
     };
 
