@@ -382,7 +382,10 @@ const TaskManager = () => {
                                             <div className="d-flex justify-content-between align-items-center">
                                                 <div>
                                                     <div className="fw-bold small">{p.users?.full_name || 'Unknown User'}</div>
-                                                    <div className="text-muted" style={{ fontSize: '0.75rem' }}>{p.users?.email_id || p.users?.mobile_number}</div>
+                                                    <div className="text-muted" style={{ fontSize: '0.75rem' }}>
+                                                        {p.users?.email_id} <br />
+                                                        {p.users?.mobile_number && <span>{p.users.mobile_number}</span>}
+                                                    </div>
                                                 </div>
                                                 <div className="text-end">
                                                     <span className={`badge bg-${p.status === 'completed' ? 'success' : 'warning'} mb-1`}>
