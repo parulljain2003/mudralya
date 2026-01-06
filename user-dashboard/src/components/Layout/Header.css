@@ -138,11 +138,33 @@
 }
 
 @media (max-width: 768px) {
+  .dashboard-header {
+    padding: 0 15px;
+    height: 60px;
+  }
+
   .menu-btn {
     display: block;
+    margin-right: 10px;
+  }
+
+  .page-title {
+    font-size: 16px;
   }
 
   .search-bar {
-    display: none; /* Hide search on mobile for simplicity, or make it collapsible */
+    display: none; /* Hide search on mobile */
+  }
+
+  .header-right {
+    gap: 10px;
+  }
+
+  .user-info {
+    display: none; /* Hide user name/role on mobile, show only avatar */
+  }
+
+  .icon-btn {
+    padding: 5px;
   }
 }

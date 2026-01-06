@@ -459,3 +459,30 @@
     flex-wrap: nowrap;
   }
 }
+
+@media (max-width: 576px) {
+  .task-page {
+    padding: 15px;
+  }
+
+  .task-search-container {
+    max-width: 100%;
+    margin-bottom: 20px;
+  }
+
+  .task-card-header {
+    padding: 15px;
+  }
+
+  /* Make filters compact on mobile if stacked */
+  .filters-sidebar {
+    padding: 15px;
+    margin-bottom: 20px;
+    height: auto; /* Remove sticky height issue if any */
+    position: static !important; /* Force static on mobile */
+  }
+
+  .task-list {
+    gap: 12px;
+  }
+}

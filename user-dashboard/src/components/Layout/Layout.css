@@ -23,5 +23,15 @@
 @media (max-width: 768px) {
   .page-content {
     padding: 15px;
+    padding-bottom: 80px; /* Add space for bottom nav or just extra scroll space */
+  }
+
+  .main-content {
+    width: 100%;
+  }
+
+  /* Prevent body scroll when sidebar is open if we add overlay later */
+  body.sidebar-open {
+    overflow: hidden;
   }
 }
